@@ -3,6 +3,7 @@
 import fastify from 'fastify'
 import fastifyCors from 'fastify-cors'
 import pino from 'pino'
+import pinoElastic from 'pino-elasticsearch'
 
 const maxRequestId = 9223372036854775807n
 
@@ -85,10 +86,10 @@ export class Fastify {
       fastifyConfig.trustProxy = fastifyConfig.trustProxy || true,
       fastifyConfig.disableRequestLogging = fastifyConfig.disableRequestLogging || true
   
-      if (fastifyConfig.logging == null) {
-        fastifyConfig.logging = true // Default to logging true (stdout)
-      } else if (fastifyConfig.logging !== true && config.elastic) {
-        fastifyConfig.logging = setupLogging(config.elastic, fastifyConfig.logging) // If elastic is configured, use pine with pine-elasticsearch
+      if (fastifyConfig.logger == null) {
+        fastifyConfig.logger = true // Default to logging true (stdout)
+      } else if (fastifyConfig.logger !== true && config.elastic) {
+        fastifyConfig.logger = setupLogging(config.elastic, fastifyConfig.logger) // If elastic is configured, use pine with pine-elasticsearch
       }
     } else {
       throw new Error('No fastify configuration is specified, if desired set fastify to {}')
