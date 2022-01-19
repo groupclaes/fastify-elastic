@@ -129,7 +129,9 @@ export class Fastify {
     // prepend routes with process.env.APP_VERSION ie /v3
     route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}/${route.url}`
 
-    route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermission)
+    if (this.authPreHandler) {
+      route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermission)
+    }
     this.server.route(route)
   }
   /**
