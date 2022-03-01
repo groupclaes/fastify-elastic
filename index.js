@@ -78,7 +78,7 @@ function addDefaultRequestHooks(fastify) {
  * @export
  * @class Fastify
  */
-export class Fastify {
+module.exports = class Fastify {
   authPreHandler
 
   server
