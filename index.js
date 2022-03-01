@@ -17,7 +17,7 @@ function generateRequestId() {
 
   let reqId = prefixZeroes + (++requestId).toString(36)
   if (reqId.length > 10) {
-    reqId = reqId.substr(1)
+    reqId = reqId.substring(1)
     prefixZeroes = prefixZeroes.slice(0, -1)
   }
 
@@ -25,7 +25,7 @@ function generateRequestId() {
 }
 
 function setupLogging(elasticConfig, loggingConfig) {
-  elasticConfig['es-version'] = elasticConfig['es-version'] || 7
+  elasticConfig['es-version'] = elasticConfig['es-version'] || 8
   elasticConfig.op_type = elasticConfig.op_type || 'create'
   elasticConfig.consistency = elasticConfig.consistency || 'one'
 
