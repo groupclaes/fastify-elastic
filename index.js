@@ -51,11 +51,21 @@ function addDefaultRequestHooks(fastify) {
     }
     done()
   })
-  
+
   fastify.addHook('onResponse', (req, reply, done) => {
     if (!req.raw.url.includes('healthcheck')) {
-      req.log.info({ url: req.raw.url, ip: req.ip, statusCode: reply.statusCode, responseTime: reply.getResponseTime() }, 'Sent response')
+      req.log.info({
+        url: req.raw.url,
+        ip: req.ip,
+        statusCode: reply.statusCode,
+        responseTime: reply.getResponseTime()
+      }, 'Sent response')
     }
+    done()
+  })
+
+  fastify.addHook('onSend', (request, reply, payload, done) => {
+    reply.header('request-id', request.id)
     done()
   })
 
@@ -80,8 +90,8 @@ export class Fastify {
     const fastifyConfig = config.fastify
     if (fastifyConfig) {
       fastifyConfig.trustProxy = fastifyConfig.trustProxy || true,
-      fastifyConfig.disableRequestLogging = fastifyConfig.disableRequestLogging || true
-  
+        fastifyConfig.disableRequestLogging = fastifyConfig.disableRequestLogging || true
+
       if (fastifyConfig.logger == null) {
         fastifyConfig.logger = true // Default to logging true (stdout)
       } else if (fastifyConfig.logger !== true && config.elastic) {
@@ -121,7 +131,7 @@ export class Fastify {
    * @param {Object} route 
    */
   route(route) {
-    
+
     // prepend routes with process.env.APP_VERSION ie /v3
     route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}/${route.url}`
 
