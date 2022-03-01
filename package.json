@@ -1,9 +1,8 @@
 {
   "name": "@groupclaes/fastify-elastic",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "GroupClaes's simple fastify wrapper function for simpler setup and elastic logging support",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
