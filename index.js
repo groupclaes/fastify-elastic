@@ -1,27 +1,23 @@
 'use strict'
 
-import fastify from 'fastify'
-import fastifyCors from 'fastify-cors'
-import pino from 'pino'
-import pinoElastic from 'pino-elasticsearch'
+// canwedo require plox :upsideDown:
+const fastify = require('fastify')
+const fastifyCors = require('fastify-cors')
+const pino = require('pino')
+const pinoElastic = require('pino-elasticsearch')
 
-const maxRequestId = 9223372036854775807n
-
+const maxRequestId = 3656158440062975n
 let requestId = 0
-let prefixZeroes = '000000000'
+const hostname = require('os').hostname()
 
 function generateRequestId() {
+  // Check if the request id has exceeded the max, exit process otherwise
   if (requestId >= maxRequestId) {
-    requestId = 1
+    this.server.log.error({ requestId }, 'Fastify server reached maxRequestId kill this instance!')
+    process.exit(13)
   }
 
-  let reqId = prefixZeroes + (++requestId).toString(36)
-  if (reqId.length > 10) {
-    reqId = reqId.substr(1)
-    prefixZeroes = prefixZeroes.slice(0, -1)
-  }
-
-  return reqId
+  return hostname + ('0000000000' + (++requestId).toString(36)).slice(-10)
 }
 
 function setupLogging(elasticConfig, loggingConfig) {
