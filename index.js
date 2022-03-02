@@ -45,7 +45,7 @@ function setupLogging(elasticConfig, loggingConfig) {
 }
 
 function addDefaultRequestHooks(fastify) {
-  fastify.addHook('onRequest', (req, _, done) => {
+  fastify.addHook('onRequest', (req, reply, done) => {
     if (!req.raw.url.includes('healthcheck')) {
       req.log.info({ url: req.raw.url }, 'Received request')
     }
@@ -81,10 +81,12 @@ function addDefaultRequestHooks(fastify) {
 module.exports = class Fastify {
   authPreHandler
 
+  config
   server
   serviceName
 
   constructor(config) {
+    this.config = config
     this.serviceName = config.serviceName
 
     const fastifyConfig = config.fastify
@@ -93,9 +95,13 @@ module.exports = class Fastify {
         fastifyConfig.disableRequestLogging = fastifyConfig.disableRequestLogging || true
 
       if (fastifyConfig.logger == null) {
-        fastifyConfig.logger = true // Default to logging true (stdout)
+        // Default to logging true (stdout)
+        fastifyConfig.logger = true
       } else if (fastifyConfig.logger !== true && config.elastic) {
-        fastifyConfig.logger = setupLogging(config.elastic, fastifyConfig.logger) // If elastic is configured, use pine with pine-elasticsearch
+        // If elastic is configured, use pine with pine-elasticsearch
+        fastifyConfig.logger = setupLogging(
+          config.elastic, fastifyConfig.logger
+        )
       }
     } else {
       throw new Error('No fastify configuration is specified, if desired set fastify to {}')
@@ -119,6 +125,7 @@ module.exports = class Fastify {
   addCors(config) {
     this.server.register(fastifyCors, config || {})
   }
+
   /**
    * 
    * @param {Function} preHandler 
@@ -126,12 +133,12 @@ module.exports = class Fastify {
   addAuthPreHandler(preHandler) {
     this.authPreHandler = preHandler
   }
+
   /**
    * Register a fastify route
    * @param {Object} route 
    */
   route(route) {
-
     // prepend routes with process.env.APP_VERSION ie /v3
     route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}${route.url}`
 
@@ -140,6 +147,7 @@ module.exports = class Fastify {
     }
     this.server.route(route)
   }
+
   /**
    * Register multiple fastify routes
    * @param {Array} routes 
@@ -153,7 +161,7 @@ module.exports = class Fastify {
    */
   async start() {
     try {
-      await this.server.listen(4002, '::')
+      await this.server.listen(this.config.port || 80, '::')
     } catch (error) {
       this.server.log.error({ error }, 'Fastify server died thowing an error')
       process.exit(1)
