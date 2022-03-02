@@ -1,11 +1,5 @@
 'use strict'
 
-// canwedo require plox :upsideDown:
-const fastify = require('fastify')
-const fastifyCors = require('fastify-cors')
-const pino = require('pino')
-const pinoElastic = require('pino-elasticsearch')
-
 const maxRequestId = 3656158440062975n
 let requestId = 0
 const hostname = require('os').hostname()
@@ -44,10 +38,10 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
     }
   }
 
-  const streamToElastic = pinoElastic(elasticConfig)
+  const streamToElastic = require('pino-elasticsearch')(elasticConfig)
   streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
 
-  const logger = pino(loggingConfig, streamToElastic)
+  const logger = require('pino')(loggingConfig, streamToElastic)
   return logger
 }
 
@@ -93,6 +87,8 @@ module.exports = class Fastify {
   serviceName
 
   constructor(config) {
+    const fastify = require('fastify')
+
     this.config = config
     this.serviceName = config.serviceName
 
@@ -130,7 +126,7 @@ module.exports = class Fastify {
    * @param {Object} config 
    */
   addCors(config) {
-    this.server.register(fastifyCors, config || {})
+    this.server.register(require('fastify-cors'), config || {})
   }
 
   /**
@@ -145,9 +141,11 @@ module.exports = class Fastify {
    * Register a fastify route
    * @param {Object} route 
    */
-  route(route) {
-    // prepend routes with process.env.APP_VERSION ie /v3
-    route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}${route.url}`
+  route(route, prepend = true) {
+    if (prepend === true) {
+      // prepend routes with process.env.APP_VERSION ie /v3
+      route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}${route.url}`
+    }
 
     if (this.authPreHandler) {
       route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermission)
@@ -159,8 +157,8 @@ module.exports = class Fastify {
    * Register multiple fastify routes
    * @param {Array} routes 
    */
-  routeMultiple(routes) {
-    routes.forEach(x => this.route(x))
+  routeMultiple(routes, prepend = true) {
+    routes.forEach(x => this.route(x, prepend))
   }
 
   /**
