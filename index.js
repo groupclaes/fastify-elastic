@@ -145,6 +145,8 @@ module.exports = class Fastify {
     if (prepend === true) {
       // prepend routes with process.env.APP_VERSION ie /v3
       route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}${route.url}`
+    } else {
+      route.url = `/${process.env.APP_VERSION ?? 'test'}${route.url}`
     }
 
     if (this.authPreHandler) {
