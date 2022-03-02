@@ -172,6 +172,7 @@ module.exports = class Fastify {
 /*
   const config = {
     serviceName: string (REQUIRED)
+    port: number | undefined
     fastify: {
       logging: boolean | object | undefined | null
     },
