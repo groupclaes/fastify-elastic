@@ -20,7 +20,7 @@ function generateRequestId() {
   return hostname + ('0000000000' + (++requestId).toString(36)).slice(-10)
 }
 
-function setupLogging(elasticConfig, loggingConfig) {
+function setupLogging(elasticConfig, loggingConfig, serviceName) {
   elasticConfig['es-version'] = elasticConfig['es-version'] || 8
   elasticConfig.op_type = elasticConfig.op_type || 'create'
   elasticConfig.consistency = elasticConfig.consistency || 'one'
@@ -35,6 +35,13 @@ function setupLogging(elasticConfig, loggingConfig) {
 
   if (loggingConfig) {
     loggingConfig.level = loggingConfig.level || 'info'
+  }
+
+  loggingConfig = {
+    ...loggingConfig,
+    base: {
+      service: serviceName
+    }
   }
 
   const streamToElastic = pinoElastic(elasticConfig)
@@ -100,7 +107,7 @@ module.exports = class Fastify {
       } else if (fastifyConfig.logger !== true && config.elastic) {
         // If elastic is configured, use pine with pine-elasticsearch
         fastifyConfig.logger = setupLogging(
-          config.elastic, fastifyConfig.logger
+          config.elastic, fastifyConfig.logger, config.serviceName
         )
       }
     } else {
