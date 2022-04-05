@@ -149,8 +149,10 @@ module.exports = class Fastify {
       route.url = `/${process.env.APP_VERSION ?? 'test'}${route.url}`
     }
 
-    if (this.authPreHandler) {
-      route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermission)
+    // Add extra check if requiredPermissions is set, Otherwise prehandler has no effect
+    // An empty requiredPermissions array / value will only validate if the token is present and not expired
+    if (this.authPreHandler && route.requiredPermissions) {
+      route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermissions)
     }
     this.server.route(route)
   }
