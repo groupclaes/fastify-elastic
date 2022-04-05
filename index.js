@@ -4,6 +4,28 @@ const maxRequestId = 3656158440062975n
 let requestId = 0
 const hostname = require('os').hostname()
 
+// ✅ Promise check
+function isPromise(p) {
+  if (typeof p === 'object' && typeof p.then === 'function') {
+    return true
+  }
+  return false
+}
+
+// ✅ Check if return value is promise
+function returnsPromise(f) {
+  if (
+    f.constructor.name === 'AsyncFunction' ||
+    (typeof f === 'function' && isPromise(f))
+  ) {
+    // console.log('✅ Function returns promise')
+    return true
+  }
+
+  // console.log('⛔️ Function does NOT return promise')
+  return false
+}
+
 function generateRequestId() {
   // Check if the request id has exceeded the max, exit process otherwise
   if (requestId >= maxRequestId) {
@@ -153,7 +175,7 @@ module.exports = class Fastify {
     // An empty requiredPermissions array / value will only validate if the token is present and not expired
     if (this.authPreHandler && route.requiredPermissions) {
       // Check if handler return Promise
-      if (returnsPromise(authPreHandler)) {
+      if (returnsPromise(this.authPreHandler)) {
         route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermissions)
       } else {
         route.preHandler = (request, reply, done) => this.authPreHandler(request, reply, done, route.requiredPermissions)
@@ -199,25 +221,3 @@ module.exports = class Fastify {
   }
 
 */
-
-// ✅ Promise check
-function isPromise(p) {
-  if (typeof p === 'object' && typeof p.then === 'function') {
-    return true
-  }
-  return false
-}
-
-// ✅ Check if return value is promise
-function returnsPromise(f) {
-  if (
-    f.constructor.name === 'AsyncFunction' ||
-    (typeof f === 'function' && isPromise(f()))
-  ) {
-    // console.log('✅ Function returns promise')
-    return true
-  }
-
-  // console.log('⛔️ Function does NOT return promise');
-  return false
-}
