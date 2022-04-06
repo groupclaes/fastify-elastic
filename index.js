@@ -1,5 +1,7 @@
 'use strict'
 
+const fastify = require('fastify')
+
 const maxRequestId = 3656158440062975n
 let requestId = 0
 const hostname = require('os').hostname()
@@ -67,6 +69,11 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
   return logger
 }
 
+/**
+ * Add default onRequest/onResponse/onSend hooks to fastify instance
+ * Add /healthcheck route for docker heathcheck test
+ * @param {fastify.FastifyInstance} fastify 
+ */
 function addDefaultRequestHooks(fastify) {
   fastify.addHook('onRequest', (req, reply, done) => {
     if (!req.raw.url.includes('healthcheck')) {
@@ -102,15 +109,20 @@ function addDefaultRequestHooks(fastify) {
  * @class Fastify
  */
 module.exports = class Fastify {
+  /** @type {Function | Promise<any>} */
   authPreHandler
 
   config
+  /** @type {fastify.FastifyInstance} */
   server
+  /** @type {string} */
   serviceName
 
+  /**
+   * Creates a new instance of Fastify with the given configuration
+   * @param {any} config
+   */
   constructor(config) {
-    const fastify = require('fastify')
-
     this.config = config
     this.serviceName = config.serviceName
 
@@ -152,7 +164,7 @@ module.exports = class Fastify {
   }
 
   /**
-   * 
+   * Set authPreHandler function to be used for authentication
    * @param {Function} preHandler 
    */
   addAuthPreHandler(preHandler) {
