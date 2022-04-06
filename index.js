@@ -153,6 +153,10 @@ module.exports = class Fastify {
     if (config.cors != null) {
       this.addCors(config.cors)
     }
+
+    if (!process.env.APP_VERSION) {
+      process.env.APP_VERSION = 'test'
+    }
   }
 
   /**
