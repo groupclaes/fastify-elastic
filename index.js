@@ -188,12 +188,12 @@ module.exports = class Fastify {
    * @param {Object} route 
    */
   route(route, prepend = true) {
+    let url = '/' + process.env.APP_VERSION
     if (prepend === true) {
       // prepend routes with process.env.APP_VERSION ie /v3
-      route.url = `/${process.env.APP_VERSION ?? 'test'}/${this.serviceName}${route.url}`
-    } else {
-      route.url = `/${process.env.APP_VERSION ?? 'test'}${route.url}`
+      url += '/' + this.serviceName
     }
+    route.url = url + route.url
 
     // Add extra check if requiredPermissions is set, Otherwise prehandler has no effect
     // An empty requiredPermissions array / value will only validate if the token is present and not expired
