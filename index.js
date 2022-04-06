@@ -190,7 +190,7 @@ module.exports = class Fastify {
   route(route, prepend = true) {
     let url = '/' + process.env.APP_VERSION
     if (prepend === true) {
-      // prepend routes with process.env.APP_VERSION ie /v3
+      // prepend routes with serviceName ie /v3
       url += '/' + this.serviceName
     }
     route.url = url + route.url
