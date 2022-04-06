@@ -109,7 +109,7 @@ function addDefaultRequestHooks(fastify) {
  * @class Fastify
  */
 module.exports = class Fastify {
-  /** @type {Function | Promise<any>} */
+  /** @type {Function} */
   authPreHandler
 
   config
@@ -165,10 +165,18 @@ module.exports = class Fastify {
 
   /**
    * Set authPreHandler function to be used for authentication
-   * @param {Function} preHandler 
+   * To decorate fastify request supply with optional `decorateVariables`
+   * @param {Function} handler
+   * @param {string | string[]} decorateVariables
    */
-  addAuthPreHandler(preHandler) {
-    this.authPreHandler = preHandler
+  addAuthPreHandler(handler, decorateVariables) {
+    this.authPreHandler = handler
+    if (decorateVariables) {
+      if (typeof decorateVariables === 'string') {
+        decorateVariables = [decorateVariables]
+      }
+      decorateVariables.forEach(x => this.server.decorateRequest(x, null))
+    }
   }
 
   /**
