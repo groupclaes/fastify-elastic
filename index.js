@@ -186,6 +186,7 @@ module.exports = class Fastify {
   /**
    * Register a fastify route
    * @param {Object} route 
+   * @param {boolean} prepend if true prepend routes with serviceName
    */
   route(route, prepend = true) {
     let url = '/' + process.env.APP_VERSION
@@ -210,7 +211,8 @@ module.exports = class Fastify {
 
   /**
    * Register multiple fastify routes
-   * @param {Array} routes 
+   * @param {Array} routes
+   * @param {boolean} prepend if true prepend routes with serviceName
    */
   routeMultiple(routes, prepend = true) {
     routes.forEach(x => this.route(x, prepend))
