@@ -75,7 +75,7 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
  * @param {fastify.FastifyInstance} fastify
  */
 function addDefaultRequestHooks(fastify) {
-  fastify.addHook('onRequest', require('./hooks/onRequest.hooks'))
+  fastify.addHook('onRequest', require('./hooks/onRequest.hook'))
   fastify.addHook('onResponse', require('./hooks/onResponse.hook'))
   fastify.addHook('preHandler', require('./hooks/preHandler.hook'))
   fastify.addHook('onSend', require('./hooks/onSend.hook'))
