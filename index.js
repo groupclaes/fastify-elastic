@@ -145,7 +145,7 @@ module.exports = class Fastify {
    * @param {Object} config 
    */
   addCors(config) {
-    this.server.register(require('fastify-cors'), config || {})
+    this.server.register(require('@fastify/cors'), config || {})
   }
 
   /**
