@@ -75,29 +75,10 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
  * @param {fastify.FastifyInstance} fastify 
  */
 function addDefaultRequestHooks(fastify) {
-  fastify.addHook('onRequest', (req, reply, done) => {
-    if (!req.raw.url.includes('healthcheck')) {
-      req.log.info({ url: req.raw.url }, 'Received request')
-    }
-    done()
-  })
-
-  fastify.addHook('onResponse', (req, reply, done) => {
-    if (!req.raw.url.includes('healthcheck')) {
-      req.log.info({
-        url: req.raw.url,
-        ip: req.ip,
-        statusCode: reply.statusCode,
-        responseTime: reply.getResponseTime()
-      }, 'Sent response')
-    }
-    done()
-  })
-
-  fastify.addHook('onSend', (request, reply, payload, done) => {
-    reply.header('request-id', request.id)
-    done()
-  })
+  fastify.addHook('onRequest', require('./hooks/onRequest.hooks'))
+  fastify.addHook('onResponse', require('./hooks/onResponse.hook'))
+  fastify.addHook('preHandler', require('./hooks/preHandler.hook'))
+  fastify.addHook('onSend', require('./hooks/onSend.hook'))
 
   fastify.route({ method: 'GET', url: '/healthcheck', handler: () => '' })
 }

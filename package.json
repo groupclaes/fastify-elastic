@@ -9,8 +9,8 @@
   "author": "flyingwraptor",
   "license": "MIT",
   "dependencies": {
-    "fastify": "^3.21.6",
-    "fastify-cors": "^6.0.2",
+    "@fastify/cors": "^7.0.0",
+    "fastify": "^3.29.0",
     "pino-elasticsearch": "^6.2.0"
   }
 }
