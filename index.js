@@ -72,7 +72,7 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
 /**
  * Add default onRequest/onResponse/onSend hooks to fastify instance
  * Add /healthcheck route for docker heathcheck test
- * @param {fastify.FastifyInstance} fastify 
+ * @param {fastify.FastifyInstance} fastify
  */
 function addDefaultRequestHooks(fastify) {
   fastify.addHook('onRequest', require('./hooks/onRequest.hooks'))
