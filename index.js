@@ -204,7 +204,7 @@ module.exports = class Fastify {
    */
   async start() {
     try {
-      await this.server.listen(this.config.port || 80, '::')
+      await this.server.listen({ port: this.config.port || 80, host: '::' })
     } catch (error) {
       this.server.log.error({ error }, 'Fastify server died thowing an error')
       process.exit(1)
