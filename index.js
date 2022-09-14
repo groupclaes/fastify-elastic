@@ -190,6 +190,7 @@ module.exports = class Fastify {
         route.preHandler = (request, reply, done) => this.authPreHandler(request, reply, done, route.requiredPermissions)
       }
     }
+    this.server.log.debug({ route }, 'Adding route')
     this.server.route(route)
   }
 

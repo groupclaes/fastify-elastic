@@ -1,6 +1,6 @@
 {
   "name": "@groupclaes/fastify-elastic",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "GroupClaes's simple fastify wrapper function for simpler setup and elastic logging support",
   "main": "index.js",
   "scripts": {
