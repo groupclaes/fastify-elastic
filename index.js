@@ -156,6 +156,8 @@ module.exports = class Fastify {
    */
   addAuthPreHandler(handler, decorateVariables) {
     this.authPreHandler = handler
+
+    this.server.log.debug({ decorateVariables }, 'Adding Auth PreHandler decoration variables')
     if (decorateVariables) {
       if (typeof decorateVariables === 'string') {
         decorateVariables = [decorateVariables]
@@ -180,6 +182,7 @@ module.exports = class Fastify {
     // Add extra check if requiredPermissions is set, Otherwise prehandler has no effect
     // An empty requiredPermissions array / value will only validate if the token is present and not expired
     if (this.authPreHandler && route.requiredPermissions) {
+      this.server.log.debug({ requiredPermissions: route.requiredPermissions, isPromise: returnsPromise(this.authPreHandler) }, 'Adding Auth PreHandler to route')
       // Check if handler return Promise
       if (returnsPromise(this.authPreHandler)) {
         route.preHandler = (request, reply) => this.authPreHandler(request, reply, route.requiredPermissions)
