@@ -1,6 +1,6 @@
 {
   "name": "@groupclaes/fastify-elastic",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "GroupClaes's simple fastify wrapper function for simpler setup and elastic logging support",
   "main": "index.js",
   "scripts": {
@@ -9,8 +9,8 @@
   "author": "flyingwraptor",
   "license": "MIT",
   "dependencies": {
-    "@fastify/cors": "^8.1.0",
-    "fastify": "^4.5.3",
-    "pino-elasticsearch": "^6.2.0"
+    "@fastify/cors": "^8.2.0",
+    "fastify": "^4.10.2",
+    "pino-elasticsearch": "^6.3.0"
   }
 }
