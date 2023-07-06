@@ -89,7 +89,7 @@ function addDefaultRequestHooks(fastify) {
  * @export
  * @class Fastify
  */
-module.exports = class Fastify {
+class Fastify {
   /** @type {Function} */
   authPreHandler
 
@@ -181,7 +181,7 @@ module.exports = class Fastify {
 
     // Add extra check if requiredPermissions is set, Otherwise prehandler has no effect
     // An empty requiredPermissions array / value will only validate if the token is present and not expired
-    if (this.authPreHandler && route.requiredPermissions) {
+    if (this.authPreHandler && (route.requiredPermissions || route.requireToken)) {
       this.server.log.debug({ requiredPermissions: route.requiredPermissions, isPromise: returnsPromise(this.authPreHandler) }, 'Adding Auth PreHandler to route')
       // Check if handler return Promise
       if (returnsPromise(this.authPreHandler)) {
@@ -214,6 +214,78 @@ module.exports = class Fastify {
       process.exit(1)
     }
   }
+}
+
+// export interface IBaseAPIResponse {
+//   status: 'error' | 'success' | 'fail'
+//   code?: number // HTTP status code
+//   message?: string // Required when status is 'error'
+//   data?: { [key: string]: any } | any // Required if status is 'success' or 'fail', data should never be an array
+//   executionTime?: number // Optional: Execution time in milliseconds
+// }
+
+/**
+ * Return a sucessful response
+ * @param {fastify.FastifyReply} reply
+ * @param {any | null} data
+ * @param {number | undefined} code
+ * @param {number | undefined} executionTime
+ * @returns {fastify.FastifyReply}
+ */
+const success = function (reply, data, code = 200, executionTime = undefined) {
+  return reply
+    .code(code)
+    .send({
+      status: 'success',
+      code,
+      data,
+      executionTime
+    })
+}
+
+/**
+ * Return a failed response
+ * @param {fastify.FastifyReply} reply
+ * @param {any | null} data
+ * @param {number | undefined} code
+ * @param {number | undefined} executionTime
+ * @returns {fastify.FastifyReply}
+ */
+const fail = function (reply, data, code = 400, data = {}, executionTime = undefined) {
+  return reply
+    .code(code)
+    .send({
+      status: 'fail',
+      code,
+      data,
+      executionTime
+    })
+}
+
+/**
+ * Return a error response
+ * @param {fastify.FastifyReply} reply
+ * @param {string} message
+ * @param {number | undefined} code
+ * @param {number | undefined} executionTime
+ * @returns {fastify.FastifyReply}
+ */
+const error = function (reply, message, executionTime = undefined) {
+  return reply
+    .code(code)
+    .send({
+      status: 'error',
+      code,
+      message,
+      executionTime
+    })
+}
+
+module.exports = {
+  Fastify: Fastify,
+  success,
+  fail,
+  error
 }
 
 /*
