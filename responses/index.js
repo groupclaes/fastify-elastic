@@ -37,7 +37,7 @@ const success = function (reply, data, code = 200, executionTime = undefined) {
  * @param {number | undefined} executionTime
  * @returns {fastify.FastifyReply}
  */
-const fail = function (reply, data, code = 400, data = {}, executionTime = undefined) {
+const fail = function (reply, data, code = 400, executionTime = undefined) {
   return reply
     .code(code)
     .send({
