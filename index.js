@@ -152,9 +152,9 @@ module.exports = class Fastify {
    * Set authPreHandler function to be used for authentication
    * To decorate fastify request supply with optional `decorateVariables`
    * @param {Function} handler
-   * @param {string | string[]} decorateVariables
+   * @param {string | string[] | undefined} decorateVariables
    */
-  addAuthPreHandler(handler, decorateVariables) {
+  addAuthPreHandler(handler, decorateVariables = 'token') {
     this.authPreHandler = handler
 
     this.server.log.debug({ decorateVariables }, 'Adding Auth PreHandler decoration variables')
