@@ -85,7 +85,6 @@ function addDefaultRequestHooks(fastify) {
 
 /**
  * Fastify wrapper class with basic setup and ease of use features
- *
  * @export
  * @class Fastify
  */
@@ -204,7 +203,7 @@ module.exports = class Fastify {
   }
 
   /**
-   * Start the fastify server instance
+   * Start the fastify server
    */
   async start() {
     try {
