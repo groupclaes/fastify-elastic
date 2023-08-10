@@ -13,12 +13,17 @@ const fastify = require('fastify')
 /**
  * Return a sucessful response
  * @param {fastify.FastifyReply} reply
- * @param {any | null} data
+ * @param {any | undefined} data
  * @param {number | undefined} code
  * @param {number | undefined} executionTime
- * @returns {fastify.FastifyReply}
+ * @returns {fastify.FastifyReply} if data is not defined return 204 response
  */
 const success = function (reply, data, code = 200, executionTime = undefined) {
+  if (!data)
+    return reply
+      .code(204)
+      .send(undefined)
+  
   return reply
     .code(code)
     .send({
