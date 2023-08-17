@@ -35,6 +35,9 @@ declare class Fastify {
   start(): void
 }
 
+export type HTTPMethods = LooseAutocomplete<'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD'>
+type LooseAutocomplete<T extends string> = T | Omit<string, T>
+
 /**
  * @param {'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD'} method
  * @param {string} url
@@ -42,7 +45,7 @@ declare class Fastify {
  * @param {string | string[]} requiredPermissions used by [@groupclaes/fastify-authhandler]
  */
 export interface IFastifyRoute {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD',
+  method: HTTPMethods,
   url: string,
   handler: (req: FastifyRequest, reply: FastifyReply) => Promise<void>,
   requiredPermissions?: string | string[]
