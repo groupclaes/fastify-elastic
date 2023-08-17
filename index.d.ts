@@ -41,13 +41,13 @@ type LooseAutocomplete<T extends string> = T | Omit<string, T>
 /**
  * @param {'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD'} method
  * @param {string} url
- * @param {(req: FastifyRequest, reply: FastifyReply) => Promise<void>} handler
+ * @param {(req: FastifyRequest<any>, reply: FastifyReply) => Promise<void>} handler
  * @param {string | string[]} requiredPermissions used by [@groupclaes/fastify-authhandler]
  */
 export interface IFastifyRoute {
   method: HTTPMethods,
   url: string,
-  handler: (req: FastifyRequest, reply: FastifyReply) => Promise<void>,
+  handler: (req: FastifyRequest<any>, reply: FastifyReply) => Promise<void>,
   requiredPermissions?: string | string[]
 }
 
