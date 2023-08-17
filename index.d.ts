@@ -32,7 +32,7 @@ export default class Fastify {
   /**
    * Start fastify instance
    */
-  start(): void
+  start(): Promise<void>
 }
 
 export type HTTPMethods = LooseAutocomplete<'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD'>
