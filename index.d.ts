@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
-declare class Fastify {
+export default class Fastify {
   authPreHandler: Function
 
   config: any
