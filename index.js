@@ -49,12 +49,12 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
 }
 
 export default async function (appConfig) {
-  config = appConfig.fastify
+  const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
 
   // defatult logger
-  if (!config.logger == null)
+  if (config.logger == null)
     config.logger = true
   else if (config.logger !== true && appConfig.elastic)
     // If elastic is configured, use pine with pine-elasticsearch
