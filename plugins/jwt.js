@@ -42,7 +42,7 @@ async function handler(request, reply) {
         return false
       }
 
-      if (payload && payload.sub)
+      if (payload?.sub)
         request.log = request.log.child({ user_id: payload.sub })
     }
   }
