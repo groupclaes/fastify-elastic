@@ -1,9 +1,11 @@
 # Fastify-Elastic
 A wrapper for using Fastify with Elastic
 
+# THIS DOCUMENTATION IS FOR v3 AND IS OUTDATED
+
 ## Installation
 ```bash
-npm i @groupclaes/fastify-elstic
+npm i @groupclaes/fastify-elastic
 ```
 
 ## Usage
