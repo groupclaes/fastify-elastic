@@ -1,54 +1,19 @@
-import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import { JWTPayload } from 'jose'
 
-export default class Fastify {
-  authPreHandler: Function
+export default async function fastify(config: IFastifyConfig): FastifyInstance { }
 
-  config: any
-  server: FastifyInstance
-  serviceName: string
+export module 'fastify' {
+  export interface FastifyRequest {
+    jwt?: JWTPayload
+    hasRole?: (role: string) => boolean
+  }
 
-  constructor(config: IFastifyConfig)
-
-  addCors(config: any): void
-
-  /**
-   * Add authentication handle [@groupclaes/fastify-authhandler]
-   * @param decorateVariables, defaults to 'token'
-   */
-  addAuthPreHandler(handler: Function, decorateVariables?: string | string[]): void
-
-  /**
-   * Register a fastify route
-   * @param prepend, defaults to true if true prepend routes with serviceName
-   */
-  route(route: IFastifyRoute, prepend: boolean): void
-
-  /**
-   * Register fastify routes
-   * @param prepend, defaults to true if true prepend routes with serviceName
-   */
-  routeMultiple(routes: IFastifyRoute[], prepend: boolean): void
-
-  /**
-   * Start fastify instance
-   */
-  start(): Promise<void>
-}
-
-export type HTTPMethods = LooseAutocomplete<'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD'>
-type LooseAutocomplete<T extends string> = T | Omit<string, T>
-
-/**
- * @param {'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD'} method
- * @param {string} url
- * @param {(req: FastifyRequest<any>, reply: FastifyReply) => Promise<void>} handler
- * @param {string | string[]} requiredPermissions used by [@groupclaes/fastify-authhandler]
- */
-export interface IFastifyRoute {
-  method: HTTPMethods,
-  url: string,
-  handler: (req: FastifyRequest<any>, reply: FastifyReply) => Promise<void>,
-  requiredPermissions?: string | string[]
+  export interface FastifyReply {
+    success: (data?: any, code?: number = 200, executionTime?: number) => FastifyReply
+    fail: (data?: any, code?: number = 400, executionTime?: number) => FastifyReply
+    error: (message?: string, code?: number = 500, executionTime?: number) => FastifyReply 
+  }
 }
 
 export interface IFastifyConfig {
