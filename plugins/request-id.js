@@ -1,13 +1,16 @@
 const hostname = require('os').hostname()
+const fastifyPlugin = require('fastify-plugin')
 
 const maxRequestId = 3656158440062975n
 let requestId = 0
+
+module.exports = fastifyPlugin(request_id)
 
 /**
  * 
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = async function (fastify, opts) {
+async function request_id(fastify) {
   fastify.addHook('onSend', set_header)
   fastify.log.debug('adding plugin request_id')
 }

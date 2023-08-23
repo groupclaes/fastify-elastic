@@ -12,6 +12,7 @@
     "@fastify/cookie": "^9.0.4",
     "@fastify/cors": "^8.3.0",
     "fastify": "^4.21.0",
+    "fastify-plugin": "^4.5.1",
     "jose": "^4.14.4",
     "pino": "^8.15.0",
     "pino-elasticsearch": "^6.6.0"

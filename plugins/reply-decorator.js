@@ -1,7 +1,11 @@
+const fastifyPlugin = require('fastify-plugin')
+
+module.exports = fastifyPlugin(replyDecorators)
+
 /**
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = async function (fastify, opts) {
+async function replyDecorators (fastify, opts) {
   fastify.decorateReply('success')
   fastify.decorateReply('fail')
   fastify.decorateReply('error')

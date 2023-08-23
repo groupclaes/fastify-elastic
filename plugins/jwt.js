@@ -1,12 +1,15 @@
+const fastifyPlugin = require('fastify-plugin')
 const jose = require('jose')
+
+module.exports = fastifyPlugin(jwt)
 
 /**
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = async function (fastify, opts) {
+async function jwt(fastify, opts) {
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('jwt')
-  await fastify.addHook('preHandler', handler)
+  fastify.addHook('preHandler', handler)
 }
 
 /**
