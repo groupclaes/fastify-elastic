@@ -2,6 +2,7 @@ const Fastify = require('fastify')
 
 // local plugins
 const request_id = require('./plugins/request-id')
+const { generate_request_id } = require('./plugins/request-id')
 const healthcheck = require('./plugins/healthcheck')
 const replyDecorator = require('./plugins/reply-decorator')
 const jwt = require('./plugins/jwt')
@@ -53,6 +54,8 @@ module.exports = function (appConfig) {
   else if (config.logger !== true && appConfig.elastic)
     // If elastic is configured, use pine with pine-elasticsearch
     config.logger = setupLogging(appConfig.elastic, config.logger, appConfig.serviceName)
+
+  config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
   // required custom plugins
