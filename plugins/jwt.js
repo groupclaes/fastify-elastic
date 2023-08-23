@@ -3,7 +3,7 @@ const jose = require('jose')
 /**
  * @param {FastifyInstance} fastify 
  */
-module.exports = function (fastify, done) {
+module.exports = function (fastify, options, done) {
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('jwt')
   fastify.addHook('preHandler', handler)
