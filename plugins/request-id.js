@@ -7,7 +7,7 @@ let requestId = 0
  * 
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-export default function request_id(fastify) {
+module.exports = function request_id(fastify) {
   fastify.options['genReqId'] = generate_request_id
   fastify.addHook('onSend', set_header)
 }

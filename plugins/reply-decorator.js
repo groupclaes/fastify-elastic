@@ -2,7 +2,7 @@
  * 
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-export default async function (fastify) {
+module.exports = async function (fastify) {
   fastify.decorateReply('success')
   fastify.decorateReply('fail')
   fastify.decorateReply('error')
