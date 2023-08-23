@@ -1,14 +1,12 @@
 const jose = require('jose')
 
 /**
- * @param {FastifyInstance} fastify 
+ * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = function (fastify, options, done) {
+module.exports = async function (fastify, opts) {
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('jwt')
-  fastify.addHook('preHandler', handler)
-
-  done()
+  await fastify.addHook('preHandler', handler)
 }
 
 /**

@@ -55,9 +55,9 @@ module.exports = async function (appConfig) {
 
   const fastify = Fastify(config)
   // required custom plugins
-  await fastify.register(require('./plugins/reply-decorator'))
-  await fastify.register(require('./plugins/request-id'))
-  await fastify.register(require('./plugins/healthcheck'), { prefix: 'healthcheck' })
+  await fastify.register(require('./plugins/reply-decorator'), { name: 'reply-decorator' })
+  await fastify.register(require('./plugins/request-id'), { name: 'request-id' })
+  await fastify.register(require('./plugins/healthcheck'), { prefix: 'healthcheck', name: 'healthcheck' })
 
   // hooks
   fastify.addHook('onRequest', async function (req, reply) {
@@ -83,7 +83,7 @@ module.exports = async function (appConfig) {
 
   // optional custom plugins
   if (appConfig.jwt)
-    await fastify.register(require('./plugins/jwt'))
+    await fastify.register(require('./plugins/jwt'), appConfig.jwt || { name: 'jwt' })
 
   return fastify
 }

@@ -7,10 +7,9 @@ let requestId = 0
  * 
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = function request_id(fastify, options, done) {
+module.exports = async function (fastify, opts) {
   fastify.addHook('onSend', set_header)
-
-  done()
+  fastify.log.debug('adding plugin request_id')
 }
 
 /**

@@ -1,7 +1,7 @@
 /**
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = async function (fastify, options, done) {
+module.exports = async function (fastify, opts) {
   fastify.decorateReply('success')
   fastify.decorateReply('fail')
   fastify.decorateReply('error')
@@ -11,8 +11,6 @@ module.exports = async function (fastify, options, done) {
     reply.fail = fail
     reply.error = error
   })
-
-  done()
 }
 
 /**
