@@ -3,7 +3,7 @@ const jose = require('jose')
 /**
  * @param {FastifyInstance} fastify 
  */
-export default async function (fastify) {
+module.exports = async function (fastify) {
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('jwt')
   fastify.addHook('preHandler', handler)
