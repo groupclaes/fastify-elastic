@@ -1,11 +1,7 @@
 const Fastify = require('fastify')
 
 // local plugins
-const request_id = require('./plugins/request-id')
 const { generate_request_id } = require('./plugins/request-id')
-const healthcheck = require('./plugins/healthcheck')
-const replyDecorator = require('./plugins/reply-decorator')
-const jwt = require('./plugins/jwt')
 
 /**
  * create logger instance using pino
@@ -43,7 +39,7 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
   return require('pino')(loggingConfig, streamToElastic)
 }
 
-module.exports = function (appConfig) {
+module.exports = async function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
@@ -59,9 +55,9 @@ module.exports = function (appConfig) {
 
   const fastify = Fastify(config)
   // required custom plugins
-  fastify.register(replyDecorator)
-  fastify.register(request_id)
-  fastify.register(healthcheck, { prefix: 'healthcheck' })
+  await fastify.register(require('./plugins/reply-decorator'))
+  await fastify.register(require('./plugins/request-id'))
+  await fastify.register(require('./plugins/healthcheck'), { prefix: 'healthcheck' })
 
   // hooks
   fastify.addHook('onRequest', async function (req, reply) {
@@ -80,14 +76,14 @@ module.exports = function (appConfig) {
 
   // optional core plugins
   if (appConfig.cors)
-    fastify.register(require('@fastify/cors'), appConfig.cors || {})
+    await fastify.register(require('@fastify/cors'), appConfig.cors || {})
 
   if (appConfig.cookie)
-    fastify.register(require('@fastify/cookie'), appConfig.cookie || {})
+    await fastify.register(require('@fastify/cookie'), appConfig.cookie || {})
 
   // optional custom plugins
   if (appConfig.jwt)
-    fastify.register(jwt)
+    await fastify.register(require('./plugins/jwt'))
 
   return fastify
 }
