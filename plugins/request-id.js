@@ -16,11 +16,11 @@ module.exports = async function request_id(fastify) {
  * @param {import ('fastify').FastifyRequest} request 
  * @param {import ('fastify').FastifyReply} reply 
  */
-async function set_header (request, reply) {
+async function set_header(request, reply) {
   reply.header('request-id', request.id)
 }
 
-module.exports = function generate_request_id() {
+module.exports.generate_request_id = function () {
   if (requestId >= maxRequestId)
     process.exit(13)
   return hostname + ('0000000000' + (++requestId).toString(36)).slice(-10)
