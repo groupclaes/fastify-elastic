@@ -73,6 +73,13 @@ module.exports = async function (appConfig) {
         responseTime: reply.getResponseTime()
       }, 'Sent response')
   })
+  fastify.addHook('onSend', async function (req, reply) {
+    // add security headers to reply
+    reply.header('X-Content-Type-Options', `nosniff`)
+    reply.header('Referrer-Policy', `no-referrer`)
+    reply.header('Permissions-Policy', `fullscreen=*`)
+    reply.header('Strict-Transport-Security', `max-age=15552000; preload`)
+  })
 
   // optional core plugins
   if (appConfig.cors)

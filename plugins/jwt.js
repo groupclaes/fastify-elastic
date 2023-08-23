@@ -6,7 +6,7 @@ module.exports = fastifyPlugin(jwt)
 /**
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-async function jwt(fastify, opts) {
+async function jwt(fastify) {
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('jwt')
   fastify.addHook('preHandler', handler)
@@ -17,12 +17,6 @@ async function jwt(fastify, opts) {
  * @param {import ('fastify').FastifyReply} reply 
  */
 async function handler(request, reply) {
-  // add security headers to reply
-  reply.header('X-Content-Type-Options', `nosniff`)
-  reply.header('Referrer-Policy', `no-referrer`)
-  reply.header('Permissions-Policy', `fullscreen=*`)
-  reply.header('Strict-Transport-Security', `max-age=15552000; preload`)
-
   // handle authorization header if set
   if (request.headers.authorization) {
     const token = request.headers.authorization.substring(7)
