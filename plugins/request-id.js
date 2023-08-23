@@ -1,12 +1,11 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { hostname } from 'os'
+const hostname = require('os').hostname()
 
 const maxRequestId = 3656158440062975n
 let requestId = 0
 
 /**
  * 
- * @param {FastifyInstance} fastify 
+ * @param {import ('fastify').FastifyInstance} fastify 
  */
 export default function request_id(fastify) {
   fastify.options['genReqId'] = generate_request_id
@@ -15,8 +14,8 @@ export default function request_id(fastify) {
 
 /**
  * set request-id header
- * @param {FastifyRequest} request 
- * @param {FastifyReply} reply 
+ * @param {import ('fastify').FastifyRequest} request 
+ * @param {import ('fastify').FastifyReply} reply 
  */
 async function set_header (request, reply) {
   reply.header('request-id', request.id)
@@ -25,5 +24,5 @@ async function set_header (request, reply) {
 function generate_request_id() {
   if (requestId >= maxRequestId)
     process.exit(13)
-  return hostname() + ('0000000000' + (++requestId).toString(36)).slice(-10)
+  return hostname + ('0000000000' + (++requestId).toString(36)).slice(-10)
 }

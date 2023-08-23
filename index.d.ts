@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import { JWTPayload } from 'jose'
 
 export default async function fastify(config: IFastifyConfig): FastifyInstance { }

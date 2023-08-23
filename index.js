@@ -1,16 +1,10 @@
-import Fastify from 'fastify'
-
-
-import fastifyCors from '@fastify/cors'
-import fastifyCookie from '@fastify/cookie'
-import pinoElasticSearch from 'pino-elasticsearch'
-import pino from 'pino'
+const Fastify = require('fastify')
 
 // local plugins
-import request_id from './plugins/request-id'
-import healthcheck from './plugins/healthcheck'
-import replyDecorator from './plugins/reply-decorator'
-import jwt from './plugins/jwt'
+const request_id = require('./plugins/request-id')
+const healthcheck = require('./plugins/healthcheck')
+const replyDecorator = require('./plugins/reply-decorator')
+const jwt = require('./plugins/jwt')
 
 /**
  * create logger instance using pino
@@ -41,14 +35,14 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
     }
   }
 
-  const streamToElastic = pinoElasticSearch(elasticConfig)
+  const streamToElastic = require('pino-elasticsearch')(elasticConfig)
   streamToElastic.on('error', (error) => console.error('Elasticsearch client error:', error))
   streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
 
-  return pino(loggingConfig, streamToElastic)
+  return require('pino')(loggingConfig, streamToElastic)
 }
 
-export default async function (appConfig) {
+module.exports = async function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
@@ -83,10 +77,10 @@ export default async function (appConfig) {
 
   // optional core plugins
   if (appConfig.cors)
-    fastify.register(fastifyCors, appConfig.cors || {})
+    fastify.register(require('@fastify/cors'), appConfig.cors || {})
 
   if (appConfig.cookie)
-    fastify.register(fastifyCookie, appConfig.cookie || {})
+    fastify.register(require('@fastify/cookie'), appConfig.cookie || {})
 
   // optional custom plugins
   if (appConfig.jwt)

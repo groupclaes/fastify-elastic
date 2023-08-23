@@ -1,8 +1,6 @@
-import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify'
-import jose from 'jose'
+const jose = require('jose')
 
 /**
- * 
  * @param {FastifyInstance} fastify 
  */
 export default async function (fastify) {
@@ -12,9 +10,8 @@ export default async function (fastify) {
 }
 
 /**
- * 
- * @param {FastifyRequest} request 
- * @param {FastifyReply} reply 
+ * @param {import ('fastify').FastifyRequest} request 
+ * @param {import ('fastify').FastifyReply} reply 
  */
 async function handler(request, reply) {
   // add security headers to reply

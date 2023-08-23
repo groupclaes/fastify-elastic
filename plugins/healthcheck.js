@@ -1,8 +1,6 @@
-import { FastifyInstance } from 'fastify'
-
 /**
- * @param {FastifyInstance} fastify 
+ * @param {import ('fastify').FastifyInstance} fastify 
  */
-export default async function healthcheck(fastify) {
+module.exports = async function healthcheck(fastify) {
   fastify.route({ method: 'GET', url: '/', handler: async () => '' })
 }
