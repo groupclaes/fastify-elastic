@@ -7,17 +7,22 @@ let requestId = 0
  * 
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = async function request_id(fastify) {
+module.exports = function request_id(fastify, done) {
   fastify.addHook('onSend', set_header)
+
+  done()
 }
 
 /**
  * set request-id header
  * @param {import ('fastify').FastifyRequest} request 
  * @param {import ('fastify').FastifyReply} reply 
+ * @param {function} done
  */
-async function set_header(request, reply) {
+function set_header(request, reply, done) {
   reply.header('request-id', request.id)
+
+  done()
 }
 
 module.exports.generate_request_id = function () {

@@ -1,8 +1,7 @@
 /**
- * 
  * @param {import ('fastify').FastifyInstance} fastify 
  */
-module.exports = async function (fastify) {
+module.exports = async function (fastify, done) {
   fastify.decorateReply('success')
   fastify.decorateReply('fail')
   fastify.decorateReply('error')
@@ -12,6 +11,8 @@ module.exports = async function (fastify) {
     reply.fail = fail
     reply.error = error
   })
+
+  done()
 }
 
 /**
@@ -21,7 +22,7 @@ module.exports = async function (fastify) {
  * @param {number | undefined} executionTime
  * @returns {import ('fastify').FastifyReply} if data is not defined return 204 response
  */
-async function success(data, code = 200, executionTime = undefined) {
+function success(data, code = 200, executionTime = undefined) {
   if (!data)
     return this
       .code(204)
@@ -44,7 +45,7 @@ async function success(data, code = 200, executionTime = undefined) {
  * @param {number | undefined} executionTime
  * @returns {import ('fastify').FastifyReply}
  */
-async function fail(data, code = 400, executionTime = undefined) {
+function fail(data, code = 400, executionTime = undefined) {
   return this
     .code(code)
     .send({
@@ -62,7 +63,7 @@ async function fail(data, code = 400, executionTime = undefined) {
  * @param {number | undefined} executionTime
  * @returns {import ('fastify').FastifyReply}
  */
-async function error(message, code = 500, executionTime = undefined) {
+function error(message, code = 500, executionTime = undefined) {
   return this
     .code(code)
     .send({

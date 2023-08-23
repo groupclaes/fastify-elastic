@@ -3,10 +3,12 @@ const jose = require('jose')
 /**
  * @param {FastifyInstance} fastify 
  */
-module.exports = async function (fastify) {
+module.exports = function (fastify, done) {
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('jwt')
   fastify.addHook('preHandler', handler)
+
+  done()
 }
 
 /**
@@ -43,4 +45,5 @@ async function handler(request, reply) {
         request.log = request.log.child({ user_id: payload.sub })
     }
   }
+  return
 }
