@@ -42,7 +42,7 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
   return require('pino')(loggingConfig, streamToElastic)
 }
 
-module.exports = async function (appConfig) {
+module.exports = function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
