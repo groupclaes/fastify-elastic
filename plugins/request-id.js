@@ -21,10 +21,8 @@ async function request_id(fastify) {
  * @param {import ('fastify').FastifyReply} reply 
  * @param {function} done
  */
-function set_header(request, reply, done) {
+async function set_header(request, reply) {
   reply.header('request-id', request.id)
-
-  done()
 }
 
 module.exports.generate_request_id = function () {
