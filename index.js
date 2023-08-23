@@ -14,7 +14,7 @@ const jwt = require('./plugins/jwt')
  * @returns 
  */
 function setupLogging(elasticConfig, loggingConfig, serviceName) {
-  elasticConfig['es-version'] = elasticConfig['es-version'] || 8
+  elasticConfig.esVersion = elasticConfig['es-version'] || 8
   elasticConfig.op_type = elasticConfig.op_type || 'create'
   elasticConfig.consistency = elasticConfig.consistency || 'one'
 
