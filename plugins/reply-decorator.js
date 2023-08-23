@@ -1,8 +1,6 @@
-import { FastifyInstance, FastifyReply } from 'fastify'
-
 /**
  * 
- * @param {FastifyInstance} fastify 
+ * @param {import ('fastify').FastifyInstance} fastify 
  */
 export default async function (fastify) {
   fastify.decorateReply('success')
@@ -21,7 +19,7 @@ export default async function (fastify) {
  * @param {any | undefined} data
  * @param {number | undefined} code
  * @param {number | undefined} executionTime
- * @returns {FastifyReply} if data is not defined return 204 response
+ * @returns {import ('fastify').FastifyReply} if data is not defined return 204 response
  */
 async function success(data, code = 200, executionTime = undefined) {
   if (!data)
@@ -44,7 +42,7 @@ async function success(data, code = 200, executionTime = undefined) {
  * @param {any | null} data
  * @param {number | undefined} code
  * @param {number | undefined} executionTime
- * @returns {FastifyReply}
+ * @returns {import ('fastify').FastifyReply}
  */
 async function fail(data, code = 400, executionTime = undefined) {
   return this
@@ -62,7 +60,7 @@ async function fail(data, code = 400, executionTime = undefined) {
  * @param {string} message
  * @param {number | undefined} code
  * @param {number | undefined} executionTime
- * @returns {FastifyReply}
+ * @returns {import ('fastify').FastifyReply}
  */
 async function error(message, code = 500, executionTime = undefined) {
   return this
