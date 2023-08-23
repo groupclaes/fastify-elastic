@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify'
 import { JWTPayload } from 'jose'
 
-export default async function fastify(config: IFastifyConfig): FastifyInstance { }
+export default function fastify(config: IFastifyConfig): Promise<FastifyInstance>
 
 export module 'fastify' {
   export interface FastifyRequest {
@@ -10,9 +10,9 @@ export module 'fastify' {
   }
 
   export interface FastifyReply {
-    success: (data?: any, code?: number = 200, executionTime?: number) => FastifyReply
-    fail: (data?: any, code?: number = 400, executionTime?: number) => FastifyReply
-    error: (message?: string, code?: number = 500, executionTime?: number) => FastifyReply 
+    success: (data?: any, code?: number, executionTime?: number) => FastifyReply
+    fail: (data?: any, code?: number, executionTime?: number) => FastifyReply
+    error: (message?: string, code?: number, executionTime?: number) => FastifyReply
   }
 }
 
