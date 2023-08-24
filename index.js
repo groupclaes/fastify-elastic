@@ -60,7 +60,7 @@ module.exports = async function (appConfig) {
   fastify.addHook('onRequest', async function (req, reply) {
     if (!req.raw.url.includes('healthcheck'))
       req.log.info({ url: req.raw.url }, 'Received request')
-    req.log = request.log.child({ version: env.APP_VERSION ?? 'test' })
+    req.log = req.log.child({ version: env.APP_VERSION ?? 'test' })
   })
   fastify.addHook('onResponse', async function (req, reply) {
     if (!req.raw.url.includes('healthcheck'))
