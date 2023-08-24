@@ -1,5 +1,7 @@
 const Fastify = require('fastify')
 
+const { env } = require('process')
+
 // local plugins
 const { generate_request_id } = require('./plugins/request-id')
 
@@ -11,9 +13,9 @@ const { generate_request_id } = require('./plugins/request-id')
  * @returns 
  */
 function setupLogging(elasticConfig, loggingConfig, serviceName) {
-  elasticConfig.esVersion = elasticConfig['es-version'] || 8
-  elasticConfig.op_type = elasticConfig.op_type || 'create'
-  elasticConfig.consistency = elasticConfig.consistency || 'one'
+  elasticConfig.esVersion = elasticConfig['es-version'] ?? 8
+  elasticConfig.op_type = elasticConfig.op_type ?? 'create'
+  elasticConfig.consistency = elasticConfig.consistency ?? 'one'
 
   if (elasticConfig.auth == null || elasticConfig.auth.username == null || elasticConfig.auth.password == null)
     throw new Error('The elastic authentication isn\'t configurd correctly, please provide a username and a password')
@@ -23,7 +25,7 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
     throw new Error('The elastic password isn\'t secure enough, no can do!')
 
   if (loggingConfig)
-    loggingConfig.level = loggingConfig.level || 'info'
+    loggingConfig.level = loggingConfig.level ?? 'info'
 
   loggingConfig = {
     ...loggingConfig,
@@ -50,19 +52,15 @@ module.exports = async function (appConfig) {
   else if (config.logger !== true && appConfig.elastic)
     // If elastic is configured, use pine with pine-elasticsearch
     config.logger = setupLogging(appConfig.elastic, config.logger, appConfig.serviceName)
-
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
-  // required custom plugins
-  await fastify.register(require('./plugins/reply-decorator'), { name: 'reply-decorator' })
-  await fastify.register(require('./plugins/request-id'), { name: 'request-id' })
-  await fastify.register(require('./plugins/healthcheck'), { prefix: 'healthcheck', name: 'healthcheck' })
 
   // hooks
   fastify.addHook('onRequest', async function (req, reply) {
     if (!req.raw.url.includes('healthcheck'))
       req.log.info({ url: req.raw.url }, 'Received request')
+    req.log = request.log.child({ version: env.APP_VERSION ?? 'test' })
   })
   fastify.addHook('onResponse', async function (req, reply) {
     if (!req.raw.url.includes('healthcheck'))
@@ -80,6 +78,11 @@ module.exports = async function (appConfig) {
     reply.header('Permissions-Policy', `fullscreen=*`)
     reply.header('Strict-Transport-Security', `max-age=15552000; preload`)
   })
+
+  // required custom plugins
+  await fastify.register(require('./plugins/reply-decorator'), { name: 'reply-decorator' })
+  await fastify.register(require('./plugins/request-id'), { name: 'request-id' })
+  await fastify.register(require('./plugins/healthcheck'), { prefix: 'healthcheck', name: 'healthcheck' })
 
   // optional core plugins
   if (appConfig.cors)
