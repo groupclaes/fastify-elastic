@@ -30,6 +30,7 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
   loggingConfig = {
     ...loggingConfig,
     base: {
+      ...elasticConfig.base,
       service: serviceName,
       version: env.APP_VERSION ?? 'test'
     }
