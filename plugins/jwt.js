@@ -2,6 +2,7 @@ const fastifyPlugin = require('fastify-plugin')
 const jose = require('jose')
 
 module.exports = fastifyPlugin(jwt)
+module.exports.handler = handler
 
 /**
  * @param {import ('fastify').FastifyInstance} fastify 
@@ -16,7 +17,7 @@ async function jwt(fastify) {
  * @param {import ('fastify').FastifyRequest} request 
  * @param {import ('fastify').FastifyReply} reply 
  */
-module.exports.handler = async function handler(request, reply) {
+async function handler(request, reply) {
   // handle authorization header if set
   if (request.headers.authorization) {
     const token = request.headers.authorization.substring(7)
