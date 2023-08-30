@@ -16,7 +16,7 @@ async function jwt(fastify) {
  * @param {import ('fastify').FastifyRequest} request 
  * @param {import ('fastify').FastifyReply} reply 
  */
-async function handler(request, reply) {
+module.exports.handler = async function handler(request, reply) {
   // handle authorization header if set
   if (request.headers.authorization) {
     const token = request.headers.authorization.substring(7)
@@ -26,18 +26,24 @@ async function handler(request, reply) {
       if (!header.jku)
         return reply.error('missing required jku in token header', 401)
 
-      const JWKS = jose.createRemoteJWKSet(new URL(header.jku))
-      const { payload } = await jose.jwtVerify(token, JWKS)
+      try {
+        const JWKS = jose.createRemoteJWKSet(new URL(header.jku))
+        const { payload } = await jose.jwtVerify(token, JWKS)
 
-      request.jwt = payload
-      request.hasRole = function (role) {
-        if (payload['roles'] && Array.isArray(payload['roles']))
-          return payload['roles'].includes(role)
-        return false
+        request.jwt = payload
+        request.hasRole = function (role) {
+          if (payload['roles'] && Array.isArray(payload['roles']))
+            return payload['roles'].includes(role)
+          return false
+        }
+
+        if (payload?.sub)
+          request.log = request.log.child({ user_id: payload.sub })
+      } catch (err) {
+        if (err.code === 'ERR_JWT_EXPIRED')
+          return reply.error(err.message, 401)
+        return reply.error(err?.message ?? 'unknown error while reading jwt', 403)
       }
-
-      if (payload?.sub)
-        request.log = request.log.child({ user_id: payload.sub })
     }
   }
   return
