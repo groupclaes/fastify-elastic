@@ -7,6 +7,7 @@ export module 'fastify' {
   export interface FastifyRequest {
     jwt?: JWTPayload
     hasRole?: (role: string) => boolean
+    hasPermission?: (permission: string, scope?: string) => boolean
   }
 
   export interface FastifyReply {
