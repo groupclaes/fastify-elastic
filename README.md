@@ -1,6 +1,23 @@
 # Fastify-Elastic
 A wrapper for using Fastify with Elastic
 
+## Add the following declaration in controller files
+```typescript
+declare module 'fastify' {
+  export interface FastifyRequest {
+    jwt?: JWTPayload
+    hasRole?: (role: string) => boolean
+    hasPermission?: (permission: string, scope?: string) => boolean
+  }
+
+  export interface FastifyReply {
+    success: (data?: any, code?: number, executionTime?: number) => FastifyReply
+    fail: (data?: any, code?: number, executionTime?: number) => FastifyReply
+    error: (message?: string, code?: number, executionTime?: number) => FastifyReply
+  }
+}
+```
+
 # THIS DOCUMENTATION IS FOR v3 AND IS OUTDATED
 
 ## Installation

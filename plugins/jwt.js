@@ -6,7 +6,7 @@ module.exports = fastifyPlugin(jwt)
 module.exports.handler = handler
 
 /**
- * @param {import ('fastify').FastifyInstance} fastify 
+ * @param {import ('fastify').FastifyInstance} fastify
  */
 async function jwt(fastify) {
   fastify.decorateRequest('hasRole')
@@ -16,8 +16,8 @@ async function jwt(fastify) {
 }
 
 /**
- * @param {import ('fastify').FastifyRequest} request 
- * @param {import ('fastify').FastifyReply} reply 
+ * @param {import ('fastify').FastifyRequest} request
+ * @param {import ('fastify').FastifyReply} reply
  */
 async function handler(request, reply) {
   // handle authorization header if set
