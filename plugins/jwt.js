@@ -66,7 +66,7 @@ function hasPermission(permssion, scope = undefined) {
 
   // get all roles for current app scope, be sure to take only first part from scope
   const roles = this.jwt['roles']
-    .filter(x => x.split(':')[1].startsWith(env['SCOPE'].split('/')[0]))
+    .filter(x => x.split(':')[1].startsWith(scope.split('/')[0]))
 
   return roles.some(x => {
     const parts = x.split(':')
