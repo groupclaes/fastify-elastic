@@ -61,10 +61,8 @@ function hasPermission(permssion, scope = undefined) {
   if (!scope)
     scope = env['SCOPE']
 
-  if (!this.jwt['roles'] || !Array.isArray(this.jwt['roles'])) {
-    console.debug('no roles on jwt', this.jwt)
+  if (!this.jwt['roles'] || !Array.isArray(this.jwt['roles']))
     return false
-  }
 
   // get all roles for current app scope, be sure to take only first part from scope
   const roles = this.jwt['roles']
@@ -83,7 +81,6 @@ function hasPermission(permssion, scope = undefined) {
         else if (greaterThanZero(i) && ((scopes[i] === reqScopes[i] && i + 1 === reqScopes.length) || scopes[i] === '*')) return true
       }
     }
-    console.debug('nothing happened, returning false')
     return false
   })
 }
