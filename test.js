@@ -2,6 +2,8 @@ const { env } = require('process')
 
 // test permissions function
 function hasPermission(permission, scope = undefined) {
+  if (!env['SCOPE'])
+    env['SCOPE'] = 'RIP'
   console.info(permission, scope)
   // if no scope is defined we shall use any * value for the current app
   if (!scope)
@@ -107,20 +109,20 @@ console.debug = () => { }
 const test = {
   jwt: {
     roles: [
-      'admin:GroupClaes.EMP/*'
+      'admin:GroupClaes.PCM/*'
     ]
   },
   hasPermission
 }
 
-env['SCOPE'] = 'GroupClaes.EMP/brabopak'
+env['SCOPE'] = 'GroupClaes.PCM'
 
-console.log(test.hasPermission('read', 'GroupClaes.EMP/brabopak/users'))
-console.log(test.hasPermission('write', 'GroupClaes.EMP/brabopak/users'))
-console.log(test.hasPermission('delete', 'GroupClaes.EMP/brabopak/users'))
-console.log(test.hasPermission('read', 'GroupClaes.EMP/brabopak'))
-console.log(test.hasPermission('write', 'GroupClaes.EMP/brabopak'))
-console.log(test.hasPermission('read', 'GroupClaes.EMP'))
-console.log(test.hasPermission('write', 'GroupClaes.EMP'))
+console.log(test.hasPermission('read', 'GroupClaes.PCM/brabopak/users'))
+console.log(test.hasPermission('write', 'GroupClaes.PCM/brabopak/users'))
+console.log(test.hasPermission('delete', 'GroupClaes.PCM/brabopak/users'))
+console.log(test.hasPermission('read', 'GroupClaes.PCM/document'))
+console.log(test.hasPermission('write', 'GroupClaes.PCM/document'))
+console.log(test.hasPermission('read', 'GroupClaes.PCM/*'))
+console.log(test.hasPermission('write', 'GroupClaes.PCM/*'))
 console.log(test.hasPermission('read'))
 console.log(test.hasPermission('write'))
