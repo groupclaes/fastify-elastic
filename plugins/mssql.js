@@ -16,13 +16,11 @@ let mssql_connections = {}
 async function mssql(fastify, opts) {
   mssql_connections = opts
 
-  fastify.decorateRequest('getSqlPool')
-  fastify.decorateRequest('closeAllSqlPools')
+  fastify.decorate('getSqlPool')
+  fastify.decorate('closeAllSqlPools')
 
-  fastify.addHook('onRequest', async function (r) {
-    r.getSqlPool = getSqlPool
-    r.closeAllSqlPools = closeAllSqlPools
-  })
+  fastify.getSqlPool = getSqlPool
+  fastify.closeAllSqlPools = closeAllSqlPools
 }
 
 /**
