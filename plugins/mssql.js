@@ -1,5 +1,6 @@
 const fastifyPlugin = require('fastify-plugin')
 const sql = require('mssql')
+const { env } = require('process')
 
 module.exports = fastifyPlugin(mssql)
 
@@ -25,10 +26,14 @@ async function mssql(fastify, opts) {
 
 /**
  * 
- * @param {string} name
+ * @param {string?} name
  * @returns {Promise<sql.ConnectionPool>} 
  */
 async function getSqlPool(name) {
+  if (!name && env['DB_NAME'])
+    name = env['DB_NAME']
+  else
+    throw new Error('No connection name supplied')
   if (!pools.has(name)) {
     if (!mssql_connections[name]) {
       throw new Error(`Configuration for pool '${name}' does not exist!`)
