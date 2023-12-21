@@ -1,6 +1,6 @@
 {
   "name": "@groupclaes/fastify-elastic",
-  "version": "4.1.5",
+  "version": "4.2.0-next.0",
   "description": "GroupClaes's simple fastify wrapper function for simpler setup and elastic logging support",
   "main": "index.js",
   "scripts": {
@@ -14,10 +14,8 @@
     "fastify": "^4.21.0",
     "fastify-plugin": "^4.5.1",
     "jose": "^4.14.4",
+    "mssql": "^10.0.1",
     "pino": "^8.15.0",
     "pino-elasticsearch": "^6.6.0"
-  },
-  "devDependencies": {
-    "@types/pino": "^7.0.5"
   }
 }

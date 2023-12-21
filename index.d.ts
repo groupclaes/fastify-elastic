@@ -7,7 +7,7 @@ export interface IFastifyConfig {
   serviceName: string
   port?: number
   fastify?: {
-    logging?: boolean | object
+    logger?: boolean | object
   },
   elastic?: {
     node?: string,

@@ -115,5 +115,8 @@ module.exports = async function (appConfig) {
   if (appConfig.jwt)
     await fastify.register(require('./plugins/jwt'), appConfig.jwt || { name: 'jwt' })
 
+  if (appConfig.mssql)
+    await fastify.register(require('./plugins/mssql'), appConfig.mssql)
+
   return fastify
 }
