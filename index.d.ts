@@ -7,7 +7,11 @@ export interface IFastifyConfig {
   serviceName: string
   port?: number
   fastify?: {
-    logger?: boolean | object
+    logger?: boolean | object,
+    requestLogging?: boolean,
+    disableRequestLogging?: boolean,
+    securityHeaders?: boolean,
+    additionalSecurityHeaders?: boolean
   },
   elastic?: {
     node?: string,
@@ -15,7 +19,10 @@ export interface IFastifyConfig {
     auth: {
       username: string,
       password: string
-    }
+    },
   },
+  logtail?: {
+    token: string
+  }
   cors: any
 }
