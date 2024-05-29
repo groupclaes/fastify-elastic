@@ -12,7 +12,7 @@ const { generate_request_id } = require('./plugins/request-id')
  * @param {string} serviceName
  * @returns 
  */
-function setupLogging(elasticConfig, loggingConfig, serviceName) {
+function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   elasticConfig.esVersion = elasticConfig['es-version'] ?? 8
   elasticConfig.op_type = elasticConfig.op_type ?? 'create'
   elasticConfig.consistency = elasticConfig.consistency ?? 'one'
@@ -43,6 +43,35 @@ function setupLogging(elasticConfig, loggingConfig, serviceName) {
   return require('pino')(loggingConfig, streamToElastic)
 }
 
+function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
+  if (loggingConfig)
+    loggingConfig.level = loggingConfig.level ?? 'info'
+
+  loggingConfig = {
+    ...loggingConfig,
+    base: {
+      ...logtailConfig.base,
+      service: serviceName,
+      version: env.APP_VERSION ?? 'test'
+    }
+  }
+  const transport = pino.transport({
+    target: "@logtail/pino",
+    options: { sourceToken: logtailConfig.token }
+  });
+  return require('pino')(loggingConfig, transport)
+}
+
+function setupLogging(appConfig, loggingConfig) {
+  if (appConfig.elastic)
+    // If elastic is configured, use pino with pino-elasticsearch
+    return setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
+  else if (appConfig.logtail)
+    // If Logtail is configured, use pino with @logtail/pino
+    return setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName)
+  return loggingConfig
+}
+
 module.exports = async function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
@@ -51,9 +80,8 @@ module.exports = async function (appConfig) {
   // defatult logger
   if (config.logger == null)
     config.logger = true
-  else if (config.logger !== true && appConfig.elastic)
-    // If elastic is configured, use pine with pine-elasticsearch
-    config.logger = setupLogging(appConfig.elastic, config.logger, appConfig.serviceName)
+  else if (config.logger !== true)
+    config.logger = setupLogging(appConfig, config.logger)
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
@@ -70,7 +98,7 @@ module.exports = async function (appConfig) {
           url: request.raw.url,
           ip: request.ip,
           statusCode: reply.statusCode,
-          responseTime: reply.getResponseTime()
+          responseTime: reply.elapsedTime
         }, 'Sent response')
     })
   }

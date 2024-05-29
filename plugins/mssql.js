@@ -32,7 +32,7 @@ async function mssql(fastify, opts) {
 async function getSqlPool(name) {
   if (!name && env['DB_NAME'])
     name = env['DB_NAME']
-  else
+  else if (!name)
     throw new Error('No connection name supplied')
   if (!pools.has(name)) {
     if (!mssql_connections[name]) {
