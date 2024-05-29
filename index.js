@@ -1,4 +1,5 @@
 const Fastify = require('fastify')
+const pino = require('pino')
 
 const { env } = require('process')
 
@@ -40,7 +41,7 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   streamToElastic.on('error', (error) => console.error('Elasticsearch client error:', error))
   streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
 
-  return require('pino')(loggingConfig, streamToElastic)
+  return pino(loggingConfig, streamToElastic)
 }
 
 function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
@@ -59,7 +60,7 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
     target: "@logtail/pino",
     options: { sourceToken: logtailConfig.token }
   });
-  return require('pino')(loggingConfig, transport)
+  return pino(loggingConfig, transport)
 }
 
 function setupLogging(appConfig, loggingConfig) {
