@@ -98,7 +98,7 @@ module.exports = async function (appConfig) {
           url: request.raw.url,
           ip: request.ip,
           statusCode: reply.statusCode,
-          responseTime: reply.getResponseTime()
+          responseTime: reply.elapsedTime
         }, 'Sent response')
     })
   }
