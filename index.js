@@ -62,6 +62,16 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
   return require('pino')(loggingConfig, transport)
 }
 
+function setupLogging(appConfig, loggingConfig) {
+  if (appConfig.elastic)
+    // If elastic is configured, use pino with pino-elasticsearch
+    return setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
+  else if (appConfig.logtail)
+    // If Logtail is configured, use pino with @logtail/pino
+    return setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName)
+  return loggingConfig
+}
+
 module.exports = async function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
@@ -70,12 +80,8 @@ module.exports = async function (appConfig) {
   // defatult logger
   if (config.logger == null)
     config.logger = true
-  else if (config.logger !== true && appConfig.elastic)
-    // If elastic is configured, use pino with pino-elasticsearch
-    config.logger = setupElasticLogging(appConfig.elastic, config.logger, appConfig.serviceName)
-  else if (config.logger !== true && appConfig.logtail)
-    // If Logtail is configured, use pino with @logtail/pino
-    config.logger = setupLogtailLogging(appConfig.logtail, config.logger, appConfig.serviceName)
+  else if (config.logger !== true)
+    config.logger = setupLogging(appConfig, config.logger)
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)

@@ -19,7 +19,7 @@ export interface IFastifyConfig {
     auth: {
       username: string,
       password: string
-    },
+    }
   },
   logtail?: {
     token: string
