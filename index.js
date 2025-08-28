@@ -19,7 +19,7 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   elasticConfig.consistency = elasticConfig.consistency ?? 'one'
 
   if (elasticConfig.auth == null || elasticConfig.auth.username == null || elasticConfig.auth.password == null) {
-    throw new Error('The elastic authentication isn\'t configurd correctly, please provide a username and a password')
+    throw new Error('The elastic authentication isn\'t configured correctly, please provide a username and a password')
   } else if (elasticConfig.auth.username.length < 2) {
     throw new Error('The elastic username is invalid')
   } else if (elasticConfig.auth.password.length < 5) {
@@ -30,11 +30,12 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
     level: loggingConfig.level ?? 'info',
     target: 'pino-elasticsearch',
     options: {
-      ...loggingConfig,
+      ...elasticConfig,
       base: {
-        ...elasticConfig.base,
-        service: serviceName,
-        version: env['APP_VERSION'] ?? 'test'
+        service: {
+          name: serviceName,
+          version: env['APP_VERSION'] ?? 'test'
+        }
       }
     }
   }
@@ -48,9 +49,10 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
       ...loggingConfig,
       sourceToken: logtailConfig.token,
       base: {
-        ...logtailConfig.base,
-        service: serviceName,
-        version: env['APP_VERSION'] ?? 'test'
+        service: {
+          name: serviceName,
+          version: env['APP_VERSION'] ?? 'test'
+        }
       }
     }
   }
@@ -85,14 +87,12 @@ function setupLogging(appConfig, loggingConfig) {
     loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
   }
 
-  return pino(
-    {
-      level: loggingConfig.level ?? 'info',
-      ...options
-    }, pino.transport({
-      targets: loggingTargets
-    })
-  )
+  return pino({
+    level: loggingConfig.level ?? 'info',
+    ...options
+  }, pino.transport({
+    targets: loggingTargets
+  }))
 }
 
 module.exports = async function (appConfig) {
@@ -105,6 +105,7 @@ module.exports = async function (appConfig) {
     config.logger = true
   else if (config.logger !== true) {
     config.loggerInstance = setupLogging(appConfig, config.logger)
+    delete config.logger
   }
   config.genReqId = generate_request_id
 
