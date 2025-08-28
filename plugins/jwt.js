@@ -9,6 +9,8 @@ module.exports.handler = handler
  * @param {import ('fastify').FastifyInstance} fastify
  */
 async function jwt(fastify) {
+  fastify.log.debug('adding plugin jwt')
+
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('hasPermission')
   fastify.decorateRequest('jwt')
@@ -39,11 +41,12 @@ async function handler(request, reply) {
         request.hasPermission = hasPermission
 
         if (payload?.sub)
-          request.log = request.log.child({ user_id: payload.sub })
+          request.log = request.log.child({ user: { id: payload.sub } })
       } catch (err) {
-        if (err.code === 'ERR_JWT_EXPIRED')
-          return reply.error(err.message, 401)
-        return reply.error(err?.message ?? 'unknown error while reading jwt', 403)
+        request.log.warn({ err }, 'failed to authenticate request')
+        // if (err.code === 'ERR_JWT_EXPIRED')
+        //   return reply.error(err.message, 401)
+        // return reply.error(err?.message ?? 'unknown error while reading jwt', 403)
       }
     }
   }
@@ -51,9 +54,13 @@ async function handler(request, reply) {
 }
 
 function hasRole(role) {
-  if (this.jwt['roles'] && Array.isArray(this.jwt['roles']))
-    return this.jwt['roles'].includes(role)
-  return false
+  let hasRole = false
+
+  if (this.jwt['roles'] && Array.isArray(this.jwt['roles'])) {
+    hasRole = this.jwt['roles'].includes(role)
+  }
+
+  return hasRole
 }
 
 function hasPermission(permssion, scope = undefined) {
@@ -85,7 +92,9 @@ function hasPermission(permssion, scope = undefined) {
   })
 }
 
-function greaterThanZero(number) { return number > 0 }
+function greaterThanZero(number) {
+  return number > 0
+}
 
 // fixed permissions per role
 const permissions = {
@@ -95,26 +104,26 @@ const permissions = {
     'write_all',
     'write',
     'delete_all',
-    'delete',
+    'delete'
   ],
   'moderator': [
     'read_all',
     'read',
     'write_all',
     'write',
-    'delete',
+    'delete'
   ],
   'contributor': [
     'read_all',
     'read',
     'write',
-    'delete',
+    'delete'
   ],
   'user': [
     'read',
-    'write',
+    'write'
   ],
   'guest': [
-    'read',
+    'read'
   ]
 }

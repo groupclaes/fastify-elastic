@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify'
-import { JWTPayload } from 'jose'
 
 export default function fastify(config: IFastifyConfig): Promise<FastifyInstance>
 
@@ -21,6 +20,7 @@ export interface IFastifyConfig {
       password: string
     }
   },
+  ecs?: any,
   logtail?: {
     token: string
   }

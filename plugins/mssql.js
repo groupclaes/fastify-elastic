@@ -15,6 +15,8 @@ let mssql_connections = {}
  * @param {any} opts
  */
 async function mssql(fastify, opts) {
+  fastify.log.debug('adding plugin mssql')
+
   mssql_connections = opts
 
   fastify.decorate('getSqlPool')

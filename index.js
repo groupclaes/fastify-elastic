@@ -11,66 +11,88 @@ const { generate_request_id } = require('./plugins/request-id')
  * @param {any} elasticConfig elasticsearch config
  * @param {any} loggingConfig general logger config
  * @param {string} serviceName
- * @returns 
+ * @returns
  */
 function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   elasticConfig.esVersion = elasticConfig['es-version'] ?? 8
   elasticConfig.op_type = elasticConfig.op_type ?? 'create'
   elasticConfig.consistency = elasticConfig.consistency ?? 'one'
 
-  if (elasticConfig.auth == null || elasticConfig.auth.username == null || elasticConfig.auth.password == null)
+  if (elasticConfig.auth == null || elasticConfig.auth.username == null || elasticConfig.auth.password == null) {
     throw new Error('The elastic authentication isn\'t configurd correctly, please provide a username and a password')
-  else if (elasticConfig.auth.username.length < 2)
+  } else if (elasticConfig.auth.username.length < 2) {
     throw new Error('The elastic username is invalid')
-  else if (elasticConfig.auth.password.length < 5)
+  } else if (elasticConfig.auth.password.length < 5) {
     throw new Error('The elastic password isn\'t secure enough, no can do!')
-
-  if (loggingConfig)
-    loggingConfig.level = loggingConfig.level ?? 'info'
-
-  loggingConfig = {
-    ...loggingConfig,
-    base: {
-      ...elasticConfig.base,
-      service: serviceName,
-      version: env.APP_VERSION ?? 'test'
-    }
   }
 
-  const streamToElastic = require('pino-elasticsearch')(elasticConfig)
-  streamToElastic.on('error', (error) => console.error('Elasticsearch client error:', error))
-  streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
-
-  return pino(loggingConfig, streamToElastic)
+  return {
+    level: loggingConfig.level ?? 'info',
+    target: 'pino-elasticsearch',
+    options: {
+      ...loggingConfig,
+      base: {
+        ...elasticConfig.base,
+        service: serviceName,
+        version: env['APP_VERSION'] ?? 'test'
+      }
+    }
+  }
 }
 
 function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
-  if (loggingConfig)
-    loggingConfig.level = loggingConfig.level ?? 'info'
-
-  loggingConfig = {
-    ...loggingConfig,
-    base: {
-      ...logtailConfig.base,
-      service: serviceName,
-      version: env.APP_VERSION ?? 'test'
+  return {
+    level: loggingConfig.level ?? 'info',
+    target: '@logtail/pino',
+    options: {
+      ...loggingConfig,
+      sourceToken: logtailConfig.token,
+      base: {
+        ...logtailConfig.base,
+        service: serviceName,
+        version: env['APP_VERSION'] ?? 'test'
+      }
     }
   }
-  const transport = pino.transport({
-    target: "@logtail/pino",
-    options: { sourceToken: logtailConfig.token }
-  });
-  return pino(loggingConfig, transport)
+}
+
+function setupEcsLogging(config, serviceName) {
+  const { ecsFormat } = require('@elastic/ecs-pino-format')
+  let ecsConfig = { apmIntegration: false, serviceName }
+  if (env['APP_VERSION']) {
+    ecsConfig.serviceVersion = env['APP_VERSION']
+  }
+  if (env['NODE_ENV']) {
+    ecsConfig.env = env['NODE_ENV']
+  }
+  return ecsFormat(ecsConfig)
 }
 
 function setupLogging(appConfig, loggingConfig) {
-  if (appConfig.elastic)
-    // If elastic is configured, use pino with pino-elasticsearch
-    return setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
-  else if (appConfig.logtail)
-    // If Logtail is configured, use pino with @logtail/pino
-    return setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName)
-  return loggingConfig
+  const loggingTargets = []
+  let options = {}
+
+  if (appConfig.ecs) {
+    options = setupEcsLogging(loggingConfig, appConfig.serviceName)
+    loggingTargets.push({ target: 'pino/file' })
+  }
+  // If elastic is configured, use pino with pino-elasticsearch
+  if (appConfig.elastic) {
+    loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
+  }
+  // If Logtail is configured, use pino with @logtail/pino
+  if (appConfig.logtail) {
+    loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
+  }
+
+  return pino(
+    {
+      level: loggingConfig.level ?? 'info',
+      ...options
+    }, pino.transport({
+      targets: loggingTargets
+    })
+  )
 }
 
 module.exports = async function (appConfig) {
@@ -78,11 +100,12 @@ module.exports = async function (appConfig) {
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
 
-  // defatult logger
+  // default logger
   if (config.logger == null)
     config.logger = true
-  else if (config.logger !== true)
-    config.logger = setupLogging(appConfig, config.logger)
+  else if (config.logger !== true) {
+    config.loggerInstance = setupLogging(appConfig, config.logger)
+  }
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)

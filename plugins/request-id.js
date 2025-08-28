@@ -11,8 +11,9 @@ module.exports = fastifyPlugin(request_id)
  * @param {import ('fastify').FastifyInstance} fastify 
  */
 async function request_id(fastify) {
-  fastify.addHook('onSend', set_header)
   fastify.log.debug('adding plugin request_id')
+
+  fastify.addHook('onSend', set_header)
 }
 
 /**
