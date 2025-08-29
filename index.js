@@ -76,7 +76,8 @@ function setupLogging(appConfig, loggingConfig) {
 
   if (appConfig.ecs) {
     options = setupEcsLogging(loggingConfig, appConfig.serviceName)
-    loggingTargets.push({ target: 'pino/file' })
+    loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
+    loggingTargets.push({ level: 'trace', target: 'pino/file', options: { destination: 1 } })
   }
   // If elastic is configured, use pino with pino-elasticsearch
   if (appConfig.elastic) {
@@ -104,8 +105,9 @@ module.exports = async function (appConfig) {
   if (config.logger == null)
     config.logger = true
   else if (config.logger !== true) {
-    config.loggerInstance = setupLogging(appConfig, config.logger)
-    delete config.logger
+    config.logger = setupLogging(appConfig, config.logger)
+    // config.loggerIntance
+    // config.logger = false
   }
   config.genReqId = generate_request_id
 
