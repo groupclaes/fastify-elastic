@@ -88,6 +88,9 @@ function setupLogging(appConfig, loggingConfig) {
     loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
   }
 
+  console.log(loggingTargets)
+  console.log(options)
+
   return pino({
     level: loggingConfig.level ?? 'info',
     ...options
@@ -105,7 +108,8 @@ module.exports = async function (appConfig) {
   if (config.logger == null)
     config.logger = true
   else if (config.logger !== true) {
-    config.loggerIntance = setupLogging(appConfig, config.logger)
+    let tempConf = { ...config.logger }
+    config.loggerIntance = setupLogging(appConfig, tempConf)
     config.logger = true
   }
   config.genReqId = generate_request_id
