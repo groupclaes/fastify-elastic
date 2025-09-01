@@ -88,7 +88,7 @@ function setupLogging(appConfig, loggingConfig) {
           service: {
             name: appConfig.serviceName,
             version: env['APP_VERSION'],
-            environment: env['APP_VERSION']
+            environment: env['NODE_ENV']
           }
         }
       },
