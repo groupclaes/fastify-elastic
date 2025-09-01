@@ -28,7 +28,7 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   }
 
   return {
-    level: loggingConfig.level ?? 'info',
+    // level: loggingConfig.level ?? 'info',
     target: 'pino-elasticsearch',
     options: {
       ...elasticConfig
@@ -69,7 +69,7 @@ function setupLogging(appConfig, loggingConfig) {
   }
   // If elastic is configured, use pino with pino-elasticsearch
   if (appConfig.elastic) {
-    // loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
+    loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
   }
   // If logtail is configured, use pino with @logtail/pino
   if (appConfig.logtail) {
@@ -103,10 +103,9 @@ function setupLogging(appConfig, loggingConfig) {
       }
     },
     pino.transport({
-      level: 'trace',
-      target: 'pino/file',
-      options: { destination: 1 }
-    }))
+      targets: loggingTargets
+    })
+  )
 }
 
 module.exports = async function (appConfig) {
