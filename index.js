@@ -89,8 +89,15 @@ function setupLogging(appConfig, loggingConfig) {
     loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
   }
 
-  console.log(loggingTargets)
-  console.log(options)
+  const { ecsFormat } = require('@elastic/ecs-pino-format')
+  const pino = require('pino')
+
+  const log = pino(ecsFormat(/* options */))
+  log.info('hi')
+  log.error({ err: new Error('boom') }, 'oops there is a problem')
+
+  // console.log(loggingTargets)
+  // console.log(options)
 
   return pino(options)
   // fuck transports
