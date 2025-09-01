@@ -77,7 +77,16 @@ function setupLogging(appConfig, loggingConfig) {
     timestamp: pino.stdTimeFunctions.isoTime,
     formatters: {
       bindings: (bindings) => {
-        return { process: { pid: bindings.pid }, host: { hostname: bindings.hostname }, node_version: process.version }
+        return {
+          process: { pid: bindings.pid },
+          host: { hostname: bindings.hostname },
+          node_version: process.version,
+          service: {
+            name: appConfig.serviceName,
+            version: env['APP_VERSION'],
+            environment: env['APP_VERSION']
+          }
+        }
       },
       level: (label) => {
         return {
