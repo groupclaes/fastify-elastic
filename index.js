@@ -1,7 +1,7 @@
 const Fastify = require('fastify')
 const pino = require('pino')
 
-const { env } = require('process')
+const { env, process } = require('process')
 
 // local plugins
 const { generate_request_id } = require('./plugins/request-id')
@@ -67,16 +67,31 @@ function setupEcsLogging(config, serviceName) {
   if (env['NODE_ENV']) {
     ecsConfig.env = env['NODE_ENV']
   }
-  console.log('ecsConfig', ecsConfig)
   return ecsFormat(ecsConfig)
 }
 
 function setupLogging(appConfig, loggingConfig) {
   const loggingTargets = []
-  let options = { level: loggingConfig.level ?? 'info' }
+  let options = {
+    level: loggingConfig.level ?? 'info',
+    timestamp: pino.stdTimeFunctions.isoTime,
+    formatters: {
+      bindings: (bindings) => {
+        return { process: { pid: bindings.pid }, host: { hostname: bindings.hostname }, node_version: process.version }
+      },
+      level: (label) => {
+        return {
+          log: { level: label }
+        }
+      },
+      message: (message) => {
+        return { message }
+      }
+    }
+  }
 
   if (appConfig.ecs) {
-    options = setupEcsLogging(loggingConfig, appConfig.serviceName)
+    // options = setupEcsLogging(loggingConfig, appConfig.serviceName)
     loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
     loggingTargets.push({ level: 'trace', target: 'pino/file', options: { destination: 1 } })
   }
@@ -84,26 +99,14 @@ function setupLogging(appConfig, loggingConfig) {
   if (appConfig.elastic) {
     loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
   }
-  // If Logtail is configured, use pino with @logtail/pino
+  // If logtail is configured, use pino with @logtail/pino
   if (appConfig.logtail) {
     loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
   }
 
-  const { ecsFormat } = require('@elastic/ecs-pino-format')
-  const pino = require('pino')
-
-  const log = pino(ecsFormat(/* options */))
-  log.info('hi')
-  log.error({ err: new Error('boom') }, 'oops there is a problem')
-
-  // console.log(loggingTargets)
-  // console.log(options)
-
-  return pino(options)
-  // fuck transports
-  //   , pino.transport({
-  //   targets: loggingTargets
-  // })
+  return pino(options, pino.transport({
+    targets: loggingTargets
+  }))
 }
 
 module.exports = async function (appConfig) {
