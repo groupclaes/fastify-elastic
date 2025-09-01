@@ -105,11 +105,10 @@ module.exports = async function (appConfig) {
   if (config.logger == null)
     config.logger = true
   else if (config.logger !== true) {
-    console.log('delete logger key')
-    delete config.logger
     console.log('set instance')
     config.loggerIntance = setupLogging(appConfig, config.logger)
-    // config.loggerIntance
+    console.log('delete logger key')
+    config.logger = true
   }
   config.genReqId = generate_request_id
 
