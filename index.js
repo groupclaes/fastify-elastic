@@ -47,17 +47,17 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
   }
 }
 
-function setupEcsLogging(config, serviceName) {
-  const { ecsFormat } = require('@elastic/ecs-pino-format')
-  let ecsConfig = { apmIntegration: false, serviceName, level: config.level ?? 'info' }
-  if (env['APP_VERSION']) {
-    ecsConfig.serviceVersion = env['APP_VERSION']
-  }
-  if (env['NODE_ENV']) {
-    ecsConfig.env = env['NODE_ENV']
-  }
-  return ecsFormat(ecsConfig)
-}
+// function setupEcsLogging(config, serviceName) {
+//   const { ecsFormat } = require('@elastic/ecs-pino-format')
+//   let ecsConfig = { apmIntegration: false, serviceName, level: config.level ?? 'info' }
+//   if (env['APP_VERSION']) {
+//     ecsConfig.serviceVersion = env['APP_VERSION']
+//   }
+//   if (env['NODE_ENV']) {
+//     ecsConfig.env = env['NODE_ENV']
+//   }
+//   return ecsFormat(ecsConfig)
+// }
 
 function setupLogging(appConfig, loggingConfig) {
   const loggingTargets = []
