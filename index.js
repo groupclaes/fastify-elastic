@@ -1,7 +1,8 @@
 const Fastify = require('fastify')
 const pino = require('pino')
 
-const { env, process } = require('process')
+const process = require('node:process')
+const { env } = require('node:process')
 
 // local plugins
 const { generate_request_id } = require('./plugins/request-id')
