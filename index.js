@@ -61,7 +61,22 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
 
 function setupLogging(appConfig, loggingConfig) {
   const loggingTargets = []
-  let options = {
+
+  if (appConfig.ecs) {
+    // options = setupEcsLogging(loggingConfig, appConfig.serviceName)
+    loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
+    loggingTargets.push({ level: 'trace', target: 'pino/file', options: { destination: 1 } })
+  }
+  // If elastic is configured, use pino with pino-elasticsearch
+  if (appConfig.elastic) {
+    loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
+  }
+  // If logtail is configured, use pino with @logtail/pino
+  if (appConfig.logtail) {
+    loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
+  }
+
+  return pino({
     level: loggingConfig.level ?? 'info',
     timestamp: pino.stdTimeFunctions.isoTime,
     formatters: {
@@ -86,23 +101,7 @@ function setupLogging(appConfig, loggingConfig) {
         return { message }
       }
     }
-  }
-
-  if (appConfig.ecs) {
-    // options = setupEcsLogging(loggingConfig, appConfig.serviceName)
-    loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
-    loggingTargets.push({ level: 'trace', target: 'pino/file', options: { destination: 1 } })
-  }
-  // If elastic is configured, use pino with pino-elasticsearch
-  if (appConfig.elastic) {
-    loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
-  }
-  // If logtail is configured, use pino with @logtail/pino
-  if (appConfig.logtail) {
-    loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
-  }
-
-  return pino(options, pino.transport({
+  }, pino.transport({
     targets: loggingTargets
   }))
 }
