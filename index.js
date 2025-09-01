@@ -64,46 +64,49 @@ function setupLogging(appConfig, loggingConfig) {
 
   if (appConfig.ecs) {
     // options = setupEcsLogging(loggingConfig, appConfig.serviceName)
-    loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
+    // loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
     loggingTargets.push({ level: 'trace', target: 'pino/file', options: { destination: 1 } })
   }
   // If elastic is configured, use pino with pino-elasticsearch
   if (appConfig.elastic) {
-    loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
+    // loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
   }
   // If logtail is configured, use pino with @logtail/pino
   if (appConfig.logtail) {
-    loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
+    // loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
   }
 
   return pino({
-    level: loggingConfig.level ?? 'info',
-    timestamp: `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
-    formatters: {
-      bindings: (bindings) => {
-        return {
-          process: { pid: bindings.pid },
-          host: { hostname: bindings.hostname },
-          node_version: process.version,
-          service: {
-            name: appConfig.serviceName,
-            version: env['APP_VERSION'],
-            environment: env['NODE_ENV']
+      level: loggingConfig.level ?? 'info',
+      timestamp: `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
+      formatters: {
+        bindings: (bindings) => {
+          return {
+            process: { pid: bindings.pid },
+            host: { hostname: bindings.hostname },
+            node_version: process.version,
+            service: {
+              name: appConfig.serviceName,
+              version: env['APP_VERSION'],
+              environment: env['NODE_ENV']
+            }
           }
+        },
+        level: (label) => {
+          return {
+            log: { level: label }
+          }
+        },
+        message: (message) => {
+          return { message }
         }
-      },
-      level: (label) => {
-        return {
-          log: { level: label }
-        }
-      },
-      message: (message) => {
-        return { message }
       }
-    }
-  }, pino.transport({
-    targets: loggingTargets
-  }))
+    },
+    pino.transport({
+      level: 'trace',
+      target: 'pino/file',
+      options: { destination: 1 }
+    }))
 }
 
 module.exports = async function (appConfig) {
