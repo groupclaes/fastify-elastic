@@ -119,8 +119,9 @@ module.exports = async function (appConfig) {
   else if (config.logger !== true) {
     let tempConf = { ...config.logger }
     config.loggerIntance = setupLogging(appConfig, tempConf)
-    config.logger = true
+    delete config.logger
   }
+  console.log(JSON.stringify(config, null, 2))
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
