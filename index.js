@@ -73,7 +73,7 @@ function setupEcsLogging(config, serviceName) {
 
 function setupLogging(appConfig, loggingConfig) {
   const loggingTargets = []
-  let options: any = { level: loggingConfig.level ?? 'info' }
+  let options = { level: loggingConfig.level ?? 'info' }
 
   if (appConfig.ecs) {
     options = setupEcsLogging(loggingConfig, appConfig.serviceName)
