@@ -78,7 +78,7 @@ function setupLogging(appConfig, loggingConfig) {
 
   return pino({
     level: loggingConfig.level ?? 'info',
-    timestamp: pino.stdTimeFunctions.isoTime,
+    timestamp: `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
     formatters: {
       bindings: (bindings) => {
         return {
