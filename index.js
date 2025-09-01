@@ -115,15 +115,20 @@ module.exports = async function (appConfig) {
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
 
+
   // default logger
+  let logger = undefined
   if (config.logger == null)
     config.logger = true
   else if (config.logger !== true) {
     let tempConf = { ...config.logger }
-    config.loggerIntance = setupLogging(appConfig, tempConf)
+    logger = setupLogging(appConfig, tempConf)
+    config.loggerIntance = logger
     delete config.logger
   }
-  console.log(JSON.stringify(config, null, 2))
+  logger?.log(JSON.stringify(config, null, 2))
+  logger?.warn('Hello')
+  logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
