@@ -67,6 +67,7 @@ function setupEcsLogging(config, serviceName) {
   if (env['NODE_ENV']) {
     ecsConfig.env = env['NODE_ENV']
   }
+  console.log('ecsConfig', ecsConfig)
   return ecsFormat(ecsConfig)
 }
 
@@ -94,9 +95,11 @@ function setupLogging(appConfig, loggingConfig) {
   return pino({
     level: loggingConfig.level ?? 'info',
     ...options
-  }, pino.transport({
-    targets: loggingTargets
-  }))
+  })
+  // fuck transports
+  //   , pino.transport({
+  //   targets: loggingTargets
+  // })
 }
 
 module.exports = async function (appConfig) {
