@@ -77,35 +77,37 @@ function setupLogging(appConfig, loggingConfig) {
   }
 
   return pino({
-      level: loggingConfig.level ?? 'info',
-      timestamp: `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
-      formatters: {
-        bindings: (bindings) => {
-          return {
-            process: { pid: bindings.pid },
-            host: { hostname: bindings.hostname },
-            node_version: process.version,
-            service: {
-              name: appConfig.serviceName,
-              version: env['APP_VERSION'],
-              environment: env['NODE_ENV']
-            }
-          }
-        },
-        level: (label) => {
-          return {
-            log: { level: label }
-          }
-        },
-        message: (message) => {
-          return { message }
+    level: loggingConfig.level ?? 'info',
+    timestamp: `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
+    formatters: {
+      bindings: (bindings) => {
+        return {
+          process: { pid: bindings.pid },
+          host: { hostname: bindings.hostname }
         }
+      },
+      level: (label) => {
+        return {
+          log: { level: label }
+        }
+      },
+      log(object) {
+        return JSON.stringify(object, null, 4)
       }
     },
-    pino.transport({
+    messageKey: 'message',
+    base: {
+      node_version: process.version,
+      service: {
+        name: appConfig.serviceName,
+        version: env['APP_VERSION'],
+        environment: env['NODE_ENV']
+      }
+    },
+    transport: {
       targets: loggingTargets
-    })
-  )
+    }
+  })
 }
 
 module.exports = async function (appConfig) {
