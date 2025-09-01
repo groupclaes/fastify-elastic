@@ -105,7 +105,13 @@ function setupLogging(appConfig, loggingConfig) {
       }
     },
     transport: {
-      targets: loggingTargets
+      targets: [
+        {
+          level: 'trace',
+          target: 'pino/file',
+          options: { destination: 1 }
+        }
+      ]
     }
   })
 }
