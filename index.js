@@ -31,13 +31,7 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
     level: loggingConfig.level ?? 'info',
     target: 'pino-elasticsearch',
     options: {
-      ...elasticConfig,
-      base: {
-        service: {
-          name: serviceName,
-          version: env['APP_VERSION'] ?? 'test'
-        }
-      }
+      ...elasticConfig
     }
   }
 }
@@ -48,13 +42,7 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
     target: '@logtail/pino',
     options: {
       ...loggingConfig,
-      sourceToken: logtailConfig.token,
-      base: {
-        service: {
-          name: serviceName,
-          version: env['APP_VERSION'] ?? 'test'
-        }
-      }
+      sourceToken: logtailConfig.token
     }
   }
 }
