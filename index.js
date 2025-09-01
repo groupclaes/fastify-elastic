@@ -60,7 +60,7 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
 
 function setupEcsLogging(config, serviceName) {
   const { ecsFormat } = require('@elastic/ecs-pino-format')
-  let ecsConfig = { apmIntegration: false, serviceName }
+  let ecsConfig = { apmIntegration: false, serviceName, level: config.level ?? 'info' }
   if (env['APP_VERSION']) {
     ecsConfig.serviceVersion = env['APP_VERSION']
   }
@@ -73,7 +73,7 @@ function setupEcsLogging(config, serviceName) {
 
 function setupLogging(appConfig, loggingConfig) {
   const loggingTargets = []
-  let options = {}
+  let options: any = { level: loggingConfig.level ?? 'info' }
 
   if (appConfig.ecs) {
     options = setupEcsLogging(loggingConfig, appConfig.serviceName)
@@ -92,10 +92,7 @@ function setupLogging(appConfig, loggingConfig) {
   console.log(loggingTargets)
   console.log(options)
 
-  return pino({
-    level: loggingConfig.level ?? 'info',
-    ...options
-  })
+  return pino(options)
   // fuck transports
   //   , pino.transport({
   //   targets: loggingTargets
