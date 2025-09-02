@@ -102,14 +102,12 @@ function setupLogging(appConfig, loggingConfig) {
     },
     messageKey: 'message',
     base: {
-      process: { pid: process.pid },
-      host: { hostname: hostname },
-      node_version: process.version,
-      service: {
-        name: appConfig.serviceName,
-        version: env['APP_VERSION'],
-        environment: env['NODE_ENV']
-      }
+      'process.pid': process.pid,
+      'host.hostname': hostname,
+      'node_version': process.version,
+      'service.name': appConfig.serviceName,
+      'service.version': env['APP_VERSION'],
+      'service.environment': env['NODE_ENV']
     },
     transport: {
       level: 'trace',
@@ -136,6 +134,7 @@ module.exports = async function (appConfig) {
     logger?.warn('Hello')
     logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
   }
+  config.requestIdLogLabel = 'http.request.id'
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
