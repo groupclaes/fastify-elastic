@@ -83,7 +83,7 @@ function setupLogging(appConfig, loggingConfig) {
     formatters: {
       bindings: () => {
         return {
-          'process': { pid: process.pid },
+          'process.pid': process.pid,
           'host.hostname': hostname,
           'node_version': process.version,
           'service.name': appConfig.serviceName,
@@ -111,7 +111,8 @@ function setupLogging(appConfig, loggingConfig) {
       paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
       remove: true
     },
-    messageKey: 'message'
+    messageKey: 'message',
+    transport: setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
     // transport: {
     //   level: 'trace',
     //   target: 'pino/file',
