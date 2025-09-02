@@ -83,14 +83,18 @@ function setupLogging(appConfig, loggingConfig) {
     formatters: {
       bindings: (bindings) => {
         return {
+          'process.pid': bindings.pid,
+          'host.hostname': bindings.hostname,
+          'node_version': process.version,
+          'service.name': appConfig.serviceName,
+          'service.version': env['APP_VERSION'],
+          'service.environment': env['NODE_ENV']
           // process: { pid: process.pid },
           // host: { hostname: bindings.hostname }
         }
       },
       level: (label) => {
-        return {
-          log: { level: label }
-        }
+        return { 'log.level': label }
       },
       log(object) {
         return object
