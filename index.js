@@ -2,8 +2,9 @@ const Fastify = require('fastify')
 const pino = require('pino')
 
 const hostname = require('os').hostname()
+const uptime = require('os').uptime()
 const process = require('node:process')
-const { env } = require('node:process')
+const { env, arch } = require('node:process')
 
 // local plugins
 const { generate_request_id } = require('./plugins/request-id')
@@ -85,6 +86,8 @@ function setupLogging(appConfig, loggingConfig) {
         return {
           'process.pid': process.pid,
           'host.hostname': hostname,
+          'host.uptime': uptime,
+          'host.architecture': arch,
           'node_version': process.version,
           'service.name': appConfig.serviceName,
           'service.version': env['APP_VERSION'],
