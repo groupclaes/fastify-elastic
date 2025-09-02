@@ -79,11 +79,11 @@ function setupLogging(appConfig, loggingConfig) {
 
   return pino({
     level: loggingConfig.level ?? 'info',
-    timestamp: `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
+    timestamp: () => `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
     formatters: {
-      bindings: (bindings) => {
+      bindings: () => {
         return {
-          'process.pid': process.pid,
+          process: { pid: process.pid },
           'host.hostname': hostname,
           'node_version': process.version,
           'service.name': appConfig.serviceName,
@@ -112,14 +112,6 @@ function setupLogging(appConfig, loggingConfig) {
       remove: true
     },
     messageKey: 'message',
-    base: {
-      'process.pid': process.pid,
-      'host.hostname': hostname,
-      'node_version': process.version,
-      'service.name': appConfig.serviceName,
-      'service.version': env['APP_VERSION'],
-      'service.environment': env['NODE_ENV']
-    },
     transport: {
       level: 'trace',
       target: 'pino/file',
