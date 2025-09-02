@@ -129,6 +129,7 @@ module.exports = async function (appConfig) {
   // }
   let tempConf = { ...config.logger }
   let logger = setupLogging(appConfig, tempConf)
+  delete config.logger
   config.loggerInstance = logger
   logger?.info(JSON.stringify(config, null, 2))
   logger?.warn('Hello')
