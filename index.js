@@ -119,7 +119,6 @@ module.exports = async function (appConfig) {
 
 
   // default logger
-  let logger = undefined
   // if (config.logger == null)
   //   config.logger = true
   // else if (config.logger !== true) {
@@ -129,9 +128,9 @@ module.exports = async function (appConfig) {
   //   delete config.logger
   // }
   let tempConf = { ...config.logger }
-  logger = setupLogging(appConfig, tempConf)
+  let logger = setupLogging(appConfig, tempConf)
   config.loggerInstance = logger
-  logger?.log(JSON.stringify(config, null, 2))
+  logger?.info(JSON.stringify(config, null, 2))
   logger?.warn('Hello')
   logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
   config.genReqId = generate_request_id
