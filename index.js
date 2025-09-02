@@ -43,7 +43,7 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
       },
       node_version: process.version,
       service: {
-        name: appConfig.serviceName,
+        name: serviceName,
         version: env['APP_VERSION'],
         environment: env['NODE_ENV']
       }
