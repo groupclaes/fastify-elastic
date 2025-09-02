@@ -38,7 +38,6 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
       // process: { pid: process.pid },
       pid: process.pid,
       hostname,
-      uptime: process.uptime(),
       //   architecture: arch
       // host: {
       //   hostname,
