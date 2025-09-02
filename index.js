@@ -29,13 +29,17 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
     throw new Error('The elastic password isn\'t secure enough, no can do!')
   }
 
-  return {
-    // level: loggingConfig.level ?? 'info',
-    target: 'pino-elasticsearch',
-    options: {
-      ...elasticConfig
-    }
-  }
+  // return {
+  //   // level: loggingConfig.level ?? 'info',
+  //   target: 'pino-elasticsearch',
+  //   options: {
+  //     ...elasticConfig
+  //   }
+  // }
+  const streamToElastic = require('pino-elasticsearch')(elasticConfig)
+  streamToElastic.on('error', (error) => console.error('Elasticsearch client error:', error))
+  streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
+  return streamToElastic
 }
 
 function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
@@ -114,14 +118,13 @@ function setupLogging(appConfig, loggingConfig) {
       paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
       remove: true
     },
-    messageKey: 'message',
-    transport: setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
+    messageKey: 'message'
     // transport: {
     //   level: 'trace',
     //   target: 'pino/file',
     //   options: { destination: 1 }
     // }
-  })
+  }, setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
 }
 
 function handleSubObjects(res, key, obj) {
