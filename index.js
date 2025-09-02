@@ -83,7 +83,7 @@ function setupLogging(appConfig, loggingConfig) {
     formatters: {
       bindings: () => {
         return {
-          process: { pid: process.pid },
+          'process': { pid: process.pid },
           'host.hostname': hostname,
           'node_version': process.version,
           'service.name': appConfig.serviceName,
@@ -111,12 +111,12 @@ function setupLogging(appConfig, loggingConfig) {
       paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
       remove: true
     },
-    messageKey: 'message',
-    transport: {
-      level: 'trace',
-      target: 'pino/file',
-      options: { destination: 1 }
-    }
+    messageKey: 'message'
+    // transport: {
+    //   level: 'trace',
+    //   target: 'pino/file',
+    //   options: { destination: 1 }
+    // }
   })
 }
 
@@ -144,9 +144,10 @@ module.exports = async function (appConfig) {
     let logger = setupLogging(appConfig, tempConf)
     delete config.logger
     config.loggerInstance = logger
-    logger?.info(JSON.stringify(config, null, 2))
-    logger?.warn('Hello')
-    logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
+    // logger?.info(JSON.stringify(config, null, 2))
+    // logger?.warn('Hello')
+    // logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
+    // config.logger = true
   }
   config.requestIdLogLabel = 'http.request.id'
   config.genReqId = generate_request_id
