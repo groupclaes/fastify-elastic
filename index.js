@@ -1,6 +1,7 @@
 const Fastify = require('fastify')
 const pino = require('pino')
 
+const hostname = require('os').hostname()
 const process = require('node:process')
 const { env } = require('node:process')
 
@@ -82,8 +83,8 @@ function setupLogging(appConfig, loggingConfig) {
     formatters: {
       bindings: (bindings) => {
         return {
-          process: { pid: bindings.pid },
-          host: { hostname: bindings.hostname }
+          // process: { pid: process.pid },
+          // host: { hostname: bindings.hostname }
         }
       },
       level: (label) => {
@@ -92,11 +93,17 @@ function setupLogging(appConfig, loggingConfig) {
         }
       },
       log(object) {
-        return JSON.stringify(object, null, 4)
+        return object
       }
+    },
+    redact: {
+      paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
+      remove: true
     },
     messageKey: 'message',
     base: {
+      process: { pid: process.pid },
+      host: { hostname: hostname },
       node_version: process.version,
       service: {
         name: appConfig.serviceName,
@@ -117,23 +124,18 @@ module.exports = async function (appConfig) {
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
 
-
-  // default logger
-  // if (config.logger == null)
-  //   config.logger = true
-  // else if (config.logger !== true) {
-  //   let tempConf = { ...config.logger }
-  //   logger = setupLogging(appConfig, tempConf)
-  //   config.loggerInstance = logger
-  //   delete config.logger
-  // }
-  let tempConf = { ...config.logger }
-  let logger = setupLogging(appConfig, tempConf)
-  delete config.logger
-  config.loggerInstance = logger
-  logger?.info(JSON.stringify(config, null, 2))
-  logger?.warn('Hello')
-  logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
+  // logger
+  if (config.logger == null)
+    config.logger = true
+  else if (config.logger !== true) {
+    let tempConf = { ...config.logger }
+    let logger = setupLogging(appConfig, tempConf)
+    delete config.logger
+    config.loggerInstance = logger
+    logger?.info(JSON.stringify(config, null, 2))
+    logger?.warn('Hello')
+    logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
+  }
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
