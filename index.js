@@ -83,21 +83,28 @@ function setupLogging(appConfig, loggingConfig) {
     formatters: {
       bindings: (bindings) => {
         return {
-          'process.pid': bindings.pid,
-          'host.hostname': bindings.hostname,
+          'process.pid': process.pid,
+          'host.hostname': hostname,
           'node_version': process.version,
           'service.name': appConfig.serviceName,
           'service.version': env['APP_VERSION'],
           'service.environment': env['NODE_ENV']
-          // process: { pid: process.pid },
-          // host: { hostname: bindings.hostname }
         }
       },
       level: (label) => {
         return { 'log.level': label }
       },
       log(object) {
-        return object
+        const res = {}
+        for (let key of Object.keys(object)) {
+          let x = object[key]
+          if (typeof x === 'object' && !Array.isArray(x) && x !== null) {
+            handleSubObjects(res, key, x)
+          } else {
+            res[key] = x
+          }
+        }
+        return res
       }
     },
     redact: {
@@ -119,6 +126,17 @@ function setupLogging(appConfig, loggingConfig) {
       options: { destination: 1 }
     }
   })
+}
+
+function handleSubObjects(res, key, obj) {
+  for (let subkey of Object.keys(obj)) {
+    let y = obj[subkey]
+    if (typeof y === 'object' && !Array.isArray(y) && y !== null) {
+      handleSubObjects(res, key + '.' + subkey, y)
+    } else {
+      res[key + '.' + subkey] = y
+    }
+  }
 }
 
 module.exports = async function (appConfig) {
