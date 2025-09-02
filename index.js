@@ -35,18 +35,25 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   loggingConfig = {
     ...loggingConfig,
     base: {
-      process: { pid: process.pid },
-      host: {
-        hostname,
-        uptime: os.uptime(),
-        architecture: arch
-      },
+      // process: { pid: process.pid },
+      pid: process.pid,
+      hostname,
+      uptime: os.uptime(),
+      //   architecture: arch
+      // host: {
+      //   hostname,
+      //   uptime: os.uptime(),
+      //   architecture: arch
+      // },
       node_version: process.version,
-      service: {
-        name: serviceName,
-        version: env['APP_VERSION'],
-        environment: env['NODE_ENV']
-      }
+      service: serviceName,
+      version: env['APP_VERSION'],
+      environment: env['NODE_ENV']
+      // service: {
+      //   name: serviceName,
+      //   version: env['APP_VERSION'],
+      //   environment: env['NODE_ENV']
+      // }
     }
   }
 
