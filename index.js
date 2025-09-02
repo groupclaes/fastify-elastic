@@ -29,17 +29,31 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
     throw new Error('The elastic password isn\'t secure enough, no can do!')
   }
 
-  // return {
-  //   // level: loggingConfig.level ?? 'info',
-  //   target: 'pino-elasticsearch',
-  //   options: {
-  //     ...elasticConfig
-  //   }
-  // }
+  if (loggingConfig)
+    loggingConfig.level = loggingConfig.level ?? 'info'
+
+  loggingConfig = {
+    ...loggingConfig,
+    base: {
+      process: { pid: process.pid },
+      host: {
+        hostname,
+        uptime: os.uptime(),
+        architecture: arch
+      },
+      node_version: process.version,
+      service: {
+        name: appConfig.serviceName,
+        version: env['APP_VERSION'],
+        environment: env['NODE_ENV']
+      }
+    }
+  }
+
   const streamToElastic = require('pino-elasticsearch')(elasticConfig)
   streamToElastic.on('error', (error) => console.error('Elasticsearch client error:', error))
   streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
-  return streamToElastic
+  return pino(loggingConfig, streamToElastic)
 }
 
 function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
@@ -53,29 +67,55 @@ function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
   }
 }
 
-// function setupEcsLogging(config, serviceName) {
-//   const { ecsFormat } = require('@elastic/ecs-pino-format')
-//   let ecsConfig = { apmIntegration: false, serviceName, level: config.level ?? 'info' }
-//   if (env['APP_VERSION']) {
-//     ecsConfig.serviceVersion = env['APP_VERSION']
-//   }
-//   if (env['NODE_ENV']) {
-//     ecsConfig.env = env['NODE_ENV']
-//   }
-//   return ecsFormat(ecsConfig)
-// }
-
 function setupLogging(appConfig, loggingConfig) {
-  const loggingTargets = []
-
   if (appConfig.ecs) {
-    // options = setupEcsLogging(loggingConfig, appConfig.serviceName)
-    // loggingTargets.push({ level: loggingConfig.level ?? 'info', target: 'pino/file' })
-    loggingTargets.push({ level: 'trace', target: 'pino/file', options: { destination: 1 } })
+    return pino({
+      level: loggingConfig.level ?? 'info',
+      timestamp: () => `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
+      formatters: {
+        bindings: () => {
+          return {
+            'process.pid': process.pid,
+            'host.hostname': hostname,
+            'host.uptime': os.uptime(),
+            'host.architecture': arch,
+            'node_version': process.version,
+            'service.name': appConfig.serviceName,
+            'service.version': env['APP_VERSION'],
+            'service.environment': env['NODE_ENV']
+          }
+        },
+        level: (label) => {
+          return { 'log.level': label }
+        },
+        log(object) {
+          const res = {}
+          for (let key of Object.keys(object)) {
+            let x = object[key]
+            if (typeof x === 'object' && !Array.isArray(x) && x !== null) {
+              handleSubObjects(res, key, x)
+            } else {
+              res[key] = x
+            }
+          }
+          return res
+        }
+      },
+      redact: {
+        paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
+        remove: true
+      },
+      messageKey: 'message'
+      // transport: {
+      //   level: 'trace',
+      //   target: 'pino/file',
+      //   options: { destination: 1 }
+      // }
+    })
   }
   // If elastic is configured, use pino with pino-elasticsearch
   if (appConfig.elastic) {
-    loggingTargets.push(setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
+    return setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
   }
   // If logtail is configured, use pino with @logtail/pino
   if (appConfig.logtail) {
@@ -83,48 +123,8 @@ function setupLogging(appConfig, loggingConfig) {
   }
 
   return pino({
-    level: loggingConfig.level ?? 'info',
-    timestamp: () => `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
-    formatters: {
-      bindings: () => {
-        return {
-          'process.pid': process.pid,
-          'host.hostname': hostname,
-          'host.uptime': os.uptime(),
-          'host.architecture': arch,
-          'node_version': process.version,
-          'service.name': appConfig.serviceName,
-          'service.version': env['APP_VERSION'],
-          'service.environment': env['NODE_ENV']
-        }
-      },
-      level: (label) => {
-        return { 'log.level': label }
-      },
-      log(object) {
-        const res = {}
-        for (let key of Object.keys(object)) {
-          let x = object[key]
-          if (typeof x === 'object' && !Array.isArray(x) && x !== null) {
-            handleSubObjects(res, key, x)
-          } else {
-            res[key] = x
-          }
-        }
-        return res
-      }
-    },
-    redact: {
-      paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
-      remove: true
-    },
-    messageKey: 'message'
-    // transport: {
-    //   level: 'trace',
-    //   target: 'pino/file',
-    //   options: { destination: 1 }
-    // }
-  }, setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName))
+    level: loggingConfig.level ?? 'info'
+  })
 }
 
 function handleSubObjects(res, key, obj) {
@@ -156,7 +156,8 @@ module.exports = async function (appConfig) {
     // logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
     // config.logger = true
   }
-  config.requestIdLogLabel = 'http.request.id'
+  if (appConfig.ecs)
+    config.requestIdLogLabel = 'http.request.id'
   config.genReqId = generate_request_id
 
   const fastify = Fastify(config)
