@@ -169,6 +169,7 @@ module.exports = async function (appConfig) {
   const fastify = Fastify(config)
 
   if (config.requestLogging) {
+    fastify.log.info('requestLogging enabled, adding hooks; onRequest and onResponse to fastify Instance!')
     // hooks
     fastify.addHook('onRequest', async function (request, reply) {
       if (!request.raw.url.includes('healthcheck'))
