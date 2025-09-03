@@ -179,7 +179,8 @@ module.exports = async function (appConfig) {
       if (!request.raw.url.includes('healthcheck')) {
         if (appConfig.ecs) {
           request.log.info({
-            url: request.raw.url,
+            'url.full': request.raw.url,
+            'url.original': request.originalUrl,
             'client.ip': request.ip,
             'user_agent.original': request.headers['user-agent'],
             'http.version': '1.1',
@@ -195,12 +196,7 @@ module.exports = async function (appConfig) {
           }, 'Sent response')
         } else {
           request.log.info({
-            url: {
-              full: request.originalUrl,
-              original: request.raw.url,
-              path: request.raw.url,
-              port: request.raw.socket.localPort
-            },
+            url: request.originalUrl,
             client: {
               address: request.raw.socket.remoteAddress,
               ip: request.ip,
