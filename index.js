@@ -83,7 +83,7 @@ function setupLogging(appConfig, loggingConfig) {
           return {
             'process.pid': process.pid,
             'host.hostname': hostname,
-            'host.uptime': os.uptime(),
+            // 'host.uptime': os.uptime(),
             'host.architecture': arch,
             'node_version': process.version,
             'service.name': appConfig.serviceName,
@@ -175,13 +175,36 @@ module.exports = async function (appConfig) {
         request.log.info({ url: request.raw.url }, 'Received request')
     })
     fastify.addHook('onResponse', async function (request, reply) {
-      if (!request.raw.url.includes('healthcheck'))
-        request.log.info({
-          url: request.raw.url,
-          ip: request.ip,
-          statusCode: reply.statusCode,
-          responseTime: reply.elapsedTime
-        }, 'Sent response')
+      if (!request.raw.url.includes('healthcheck')) {
+        if (appConfig.ecs) {
+          request.log.info({
+            url: request.raw.url,
+            'client.ip': request.ip,
+            'http.request.id': request.id,
+            'http.request.method': request.method,
+            'http.request.mime_type': request.headers['content-type'],
+            'http.response.status_code': reply.statusCode,
+            'http.response.time': reply.elapsedTime
+          }, 'Sent response')
+        } else {
+          request.log.info({
+            url: request.raw.url,
+            client: { ip: request.ip },
+            http: {
+              request: {
+                id: request.id,
+                method: request.method,
+                mime_type: request.headers['content-type'],
+                headers: request.headers
+              },
+              response: {
+                status_code: reply.statusCode,
+                time: reply.elapsedTime
+              }
+            }
+          }, 'Sent response')
+        }
+      }
     })
   }
 
