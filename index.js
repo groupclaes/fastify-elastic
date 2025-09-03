@@ -172,8 +172,32 @@ module.exports = async function (appConfig) {
     fastify.log.info('requestLogging enabled, adding hooks; onRequest and onResponse to fastify Instance!')
     // hooks
     fastify.addHook('onRequest', async function (request, reply) {
-      if (!request.raw.url.includes('healthcheck'))
-        request.log.info({ url: request.raw.url }, 'Received request')
+      if (!request.raw.url.includes('healthcheck')) {
+        if (appConfig.ecs) {
+        } else {
+          request.log.info({
+            url: request.originalUrl,
+            client: {
+              ip: request.ip
+            },
+            user_agent: { original: request.headers['user-agent'] },
+            http: {
+              version: request.raw.httpVersion,
+              request: {
+                id: request.id,
+                method: request.method,
+                referer: request.headers['referer'],
+                // headers: {
+                //   host: request.headers['host'],
+                //   'user-agent': request.headers['user-agent'],
+                //   accept: request.headers['accept']
+                // }
+                headers: request.headers
+              }
+            }
+          }, 'Received request')
+        }
+      }
     })
     fastify.addHook('onResponse', async function (request, reply) {
       if (!request.raw.url.includes('healthcheck')) {
@@ -183,7 +207,7 @@ module.exports = async function (appConfig) {
             'url.original': request.originalUrl,
             'client.ip': request.ip,
             'user_agent.original': request.headers['user-agent'],
-            'http.version': '1.1',
+            'http.version': request.raw.httpVersion,
             'http.request.id': request.id,
             'http.request.method': request.method,
             'http.request.headers.host': request.headers['host'],
@@ -198,24 +222,11 @@ module.exports = async function (appConfig) {
           request.log.info({
             url: request.originalUrl,
             client: {
-              address: request.raw.socket.remoteAddress,
-              ip: request.ip,
-              port: request.raw.socket.remotePort
+              ip: request.ip
             },
             user_agent: { original: request.headers['user-agent'] },
             http: {
               version: request.raw.httpVersion,
-              request: {
-                id: request.id,
-                method: request.method,
-                referer: request.headers['referer'],
-                headers: {
-                  host: request.headers['host'],
-                  'user-agent': request.headers['user-agent'],
-                  accept: request.headers['accept']
-                }
-                // headers: request.headers
-              },
               response: {
                 status_code: reply.statusCode,
                 time: reply.elapsedTime,
