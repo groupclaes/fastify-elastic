@@ -181,26 +181,49 @@ module.exports = async function (appConfig) {
           request.log.info({
             url: request.raw.url,
             'client.ip': request.ip,
+            'user_agent.original': request.headers['user-agent'],
+            'http.version': '1.1',
             'http.request.id': request.id,
             'http.request.method': request.method,
-            'http.request.mime_type': request.headers['content-type'],
+            'http.request.headers.host': request.headers['host'],
+            'http.request.headers.user-agent': request.headers['user-agent'],
+            'http.request.headers.accept': request.headers['accept'],
+            'http.request.referer': request.headers['referer'],
             'http.response.status_code': reply.statusCode,
-            'http.response.time': reply.elapsedTime
+            'http.response.time': reply.elapsedTime,
+            'http.response.headers': reply.headers
           }, 'Sent response')
         } else {
           request.log.info({
-            url: request.raw.url,
-            client: { ip: request.ip },
+            url: {
+              full: request.originalUrl,
+              original: request.raw.url,
+              path: request.raw.url,
+              port: request.raw.socket.localPort
+            },
+            client: {
+              address: request.raw.socket.remoteAddress,
+              ip: request.ip,
+              port: request.raw.socket.remotePort
+            },
+            user_agent: { original: request.headers['user-agent'] },
             http: {
+              version: request.raw.httpVersion,
               request: {
                 id: request.id,
                 method: request.method,
-                mime_type: request.headers['content-type'],
-                headers: request.headers
+                referer: request.headers['referer'],
+                headers: {
+                  host: request.headers['host'],
+                  'user-agent': request.headers['user-agent'],
+                  accept: request.headers['accept']
+                }
+                // headers: request.headers
               },
               response: {
                 status_code: reply.statusCode,
-                time: reply.elapsedTime
+                time: reply.elapsedTime,
+                headers: reply.headers
               }
             }
           }, 'Sent response')
