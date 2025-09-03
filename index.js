@@ -207,6 +207,8 @@ module.exports = async function (appConfig) {
         }
       }
     })
+  } else {
+    fastify.log.info({ config }, 'requestLogging not enabled, we highly doubt that tho!')
   }
 
   // https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html
