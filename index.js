@@ -187,12 +187,15 @@ module.exports = async function (appConfig) {
                 id: request.id,
                 method: request.method,
                 referer: request.headers['referer'],
-                // headers: {
-                //   host: request.headers['host'],
-                //   'user-agent': request.headers['user-agent'],
-                //   accept: request.headers['accept']
-                // }
-                headers: request.headers
+                headers: {
+                  host: request.headers['host'],
+                  'accept': request.headers['accept'],
+                  'accept-encoding': request.headers['accept-encoding'],
+                  'accept-language': request.headers['accept-language'],
+                  'x-forwarded-server': request.headers['x-forwarded-server'],
+                  'x-real-ip': request.headers['x-real-ip']
+                }
+                // headers: request.headers
               }
             }
           }, 'Received request')
