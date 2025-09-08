@@ -157,10 +157,6 @@ module.exports = async function (appConfig) {
     let logger = setupLogging(appConfig, tempConf)
     delete config.logger
     config.loggerInstance = logger
-    // logger?.info(JSON.stringify(config, null, 2))
-    // logger?.warn('Hello')
-    // logger?.debug({ test: 'Hiya', id: 3 }, 'Bonjour')
-    // config.logger = true
   }
   if (appConfig.ecs)
     config.requestIdLogLabel = 'http.request.id'
