@@ -4,10 +4,10 @@ async function start()  {
   const app = await fastify({
     serviceName: 'bobs-testshed',
     fastify: {
-      disableRequestLogging: false,
-      requestLogging: true,
       logger: {
-        ecs: {
+        requestLogging: true,
+        ecs:
+        {
           containerized: true
         }
       }

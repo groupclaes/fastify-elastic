@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify'
 
 export interface IFastifyAppConfig {
   logger?: boolean | IFastifyLoggerConfig,
-  requestLogging?: boolean,
   disableRequestLogging?: boolean,
   /**
    * @deprecated
@@ -13,17 +12,17 @@ export interface IFastifyAppConfig {
 
 export interface IFastifyLoggerConfig {
   level?: string | 'info',
+  /**
+   * Show the host uptime.
+   * @requires containerized to be set false when using ECS
+   */
+  showUptime?: boolean
   ecs?: {
     /**
      * Specify if running in a container (default true)
      * @default true
      */
     containerized?: boolean
-    /**
-     * Show the host uptime.
-     * @requires containerized to be set false
-     */
-    showUptime?: boolean
   }
 }
 

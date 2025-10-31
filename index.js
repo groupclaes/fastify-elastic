@@ -12,7 +12,7 @@ const { generate_request_id } = require('./plugins/request-id')
 module.exports = async function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
-  config.disableRequestLogging = config.disableRequestLogging || true
+  config.disableRequestLogging = config.disableRequestLogging && true
   config.genReqId = generate_request_id
   config.requestIdHeader = 'x-request-id'
 
@@ -31,7 +31,7 @@ module.exports = async function (appConfig) {
 
   const fastify = Fastify(config)
 
-  if (config.requestLogging) {
+  if (!config.disableRequestLogging) {
     fastify.log.info('requestLogging enabled, adding hooks; onRequest and onResponse to fastify Instance!')
     logging.setupRequestLogging(fastify, loggingConfig)
   }
