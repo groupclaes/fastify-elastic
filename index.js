@@ -1,241 +1,39 @@
 const Fastify = require('fastify')
-const pino = require('pino')
-
-const hostname = require('os').hostname()
-const process = require('node:process')
-const os = require('os')
-const { env, arch } = require('node:process')
+const logging = require('./logging')
 
 // local plugins
 const { generate_request_id } = require('./plugins/request-id')
 
 /**
- * create logger instance using pino
- * @param {any} elasticConfig elasticsearch config
- * @param {any} loggingConfig general logger config
- * @param {string} serviceName
- * @returns
+ * 
+ * @param {import('.').IFastifyConfig} appConfig 
+ * @returns 
  */
-function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
-  elasticConfig.esVersion = elasticConfig['es-version'] ?? 8
-  elasticConfig.op_type = elasticConfig.op_type ?? 'create'
-  elasticConfig.consistency = elasticConfig.consistency ?? 'one'
-
-  if (elasticConfig.auth == null || elasticConfig.auth.username == null || elasticConfig.auth.password == null) {
-    throw new Error('The elastic authentication isn\'t configured correctly, please provide a username and a password')
-  } else if (elasticConfig.auth.username.length < 2) {
-    throw new Error('The elastic username is invalid')
-  } else if (elasticConfig.auth.password.length < 5) {
-    throw new Error('The elastic password isn\'t secure enough, no can do!')
-  }
-
-  if (loggingConfig)
-    loggingConfig.level = loggingConfig.level ?? 'info'
-
-  loggingConfig = {
-    ...loggingConfig,
-    base: {
-      // process: { pid: process.pid },
-      pid: process.pid,
-      hostname,
-      //   architecture: arch
-      // host: {
-      //   hostname,
-      //   uptime: os.uptime(),
-      //   architecture: arch
-      // },
-      node_version: process.version,
-      service: serviceName,
-      version: env['APP_VERSION'],
-      environment: env['NODE_ENV']
-      // service: {
-      //   name: serviceName,
-      //   version: env['APP_VERSION'],
-      //   environment: env['NODE_ENV']
-      // }
-    }
-  }
-
-  const streamToElastic = require('pino-elasticsearch')(elasticConfig)
-  streamToElastic.on('error', (error) => console.error('Elasticsearch client error:', error))
-  streamToElastic.on('insertError', (error) => console.log('ERROR', JSON.stringify(error, null, 6)))
-  return pino(loggingConfig, streamToElastic)
-}
-
-function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
-  return {
-    level: loggingConfig.level ?? 'info',
-    target: '@logtail/pino',
-    options: {
-      ...loggingConfig,
-      sourceToken: logtailConfig.token
-    }
-  }
-}
-
-function setupLogging(appConfig, loggingConfig) {
-  if (appConfig.ecs) {
-    return pino({
-      level: loggingConfig.level ?? 'info',
-      timestamp: () => `,"@timestamp":"${new Date(Date.now()).toISOString()}"`,
-      formatters: {
-        bindings: () => {
-          return {
-            'process.pid': process.pid,
-            'host.hostname': hostname,
-            // 'host.uptime': os.uptime(),
-            'host.architecture': arch,
-            'node_version': process.version,
-            'service.name': appConfig.serviceName,
-            'service.version': env['APP_VERSION'],
-            'service.environment': env['NODE_ENV']
-          }
-        },
-        level: (label) => {
-          return { 'log.level': label }
-        },
-        log(object) {
-          const res = {}
-          for (let key of Object.keys(object)) {
-            let x = object[key]
-            if (typeof x === 'object' && !Array.isArray(x) && x !== null) {
-              handleSubObjects(res, key, x)
-            } else {
-              res[key] = x
-            }
-          }
-          return res
-        }
-      },
-      redact: {
-        paths: ['user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile'],
-        remove: true
-      },
-      messageKey: 'message'
-      // transport: {
-      //   level: 'trace',
-      //   target: 'pino/file',
-      //   options: { destination: 1 }
-      // }
-    })
-  }
-  // If elastic is configured, use pino with pino-elasticsearch
-  if (appConfig.elastic) {
-    return setupElasticLogging(appConfig.elastic, loggingConfig, appConfig.serviceName)
-  }
-  // If logtail is configured, use pino with @logtail/pino
-  if (appConfig.logtail) {
-    // loggingTargets.push(setupLogtailLogging(appConfig.logtail, loggingConfig, appConfig.serviceName))
-  }
-
-  return pino({
-    level: loggingConfig.level ?? 'info'
-  })
-}
-
-function handleSubObjects(res, key, obj) {
-  for (let subkey of Object.keys(obj)) {
-    let y = obj[subkey]
-    if (typeof y === 'object' && !Array.isArray(y) && y !== null) {
-      handleSubObjects(res, key + '.' + subkey, y)
-    } else {
-      res[key + '.' + subkey] = y
-    }
-  }
-}
-
 module.exports = async function (appConfig) {
   const config = appConfig.fastify
   config.trustProxy = config.trustProxy || true
   config.disableRequestLogging = config.disableRequestLogging || true
-
-  // logger
-  if (config.logger == null)
-    config.logger = true
-  else if (config.logger !== true) {
-    let tempConf = { ...config.logger }
-    let logger = setupLogging(appConfig, tempConf)
-    delete config.logger
-    config.loggerInstance = logger
-  }
-  if (appConfig.ecs)
-    config.requestIdLogLabel = 'http.request.id'
   config.genReqId = generate_request_id
+  config.requestIdHeader = 'x-request-id'
+
+
+  let loggingConfig = config.logger
+
+  // Use generic pino logger
+  if (loggingConfig == null)
+    loggingConfig = true
+  else if (config.logger !== true) {
+    loggingConfig = Object.assign({}, config.logger)
+    delete config.logger
+
+    config.loggerInstance = logging.setupLogging(appConfig, loggingConfig)
+  }
 
   const fastify = Fastify(config)
 
   if (config.requestLogging) {
     fastify.log.info('requestLogging enabled, adding hooks; onRequest and onResponse to fastify Instance!')
-    // hooks
-    fastify.addHook('onRequest', async function (request, reply) {
-      if (!request.raw.url.includes('healthcheck')) {
-        if (appConfig.ecs) {
-        } else {
-          request.log.info({
-            url: request.originalUrl,
-            client: {
-              ip: request.ip
-            },
-            user_agent: { original: request.headers['user-agent'] },
-            http: {
-              version: request.raw.httpVersion,
-              request: {
-                id: request.id,
-                method: request.method,
-                referer: request.headers['referer'],
-                headers: {
-                  host: request.headers['host'],
-                  'accept': request.headers['accept'],
-                  'accept-encoding': request.headers['accept-encoding'],
-                  'accept-language': request.headers['accept-language'],
-                  'x-forwarded-server': request.headers['x-forwarded-server'],
-                  'x-real-ip': request.headers['x-real-ip']
-                }
-                // headers: request.headers
-              }
-            }
-          }, 'Received request')
-        }
-      }
-    })
-    fastify.addHook('onResponse', async function (request, reply) {
-      if (!request.raw.url.includes('healthcheck')) {
-        if (appConfig.ecs) {
-          request.log.info({
-            'url.full': request.raw.url,
-            'url.original': request.originalUrl,
-            'client.ip': request.ip,
-            'user_agent.original': request.headers['user-agent'],
-            'http.version': request.raw.httpVersion,
-            'http.request.id': request.id,
-            'http.request.method': request.method,
-            'http.request.headers.host': request.headers['host'],
-            'http.request.headers.user-agent': request.headers['user-agent'],
-            'http.request.headers.accept': request.headers['accept'],
-            'http.request.referer': request.headers['referer'],
-            'http.response.status_code': reply.statusCode,
-            'http.response.time': reply.elapsedTime,
-            'http.response.headers': reply.headers
-          }, 'Sent response')
-        } else {
-          request.log.info({
-            url: request.originalUrl,
-            client: {
-              ip: request.ip
-            },
-            user_agent: { original: request.headers['user-agent'] },
-            http: {
-              version: request.raw.httpVersion,
-              response: {
-                status_code: reply.statusCode,
-                time: reply.elapsedTime,
-                headers: reply.headers
-              }
-            }
-          }, 'Sent response')
-        }
-      }
-    })
+    logging.setupRequestLogging(fastify, loggingConfig)
   }
 
   // https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html
