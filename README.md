@@ -12,7 +12,8 @@ npm i @groupclaes/fastify-elastic@5 --save
 - Upgraded pino from v8 to v9
 - Upgraded pose from v4 to v5
 - When JWT is expired send 401 instead of 403
-- Implemented ECS logging (if ECS is enabled it is applied to all pino transports!)
+- Implemented ECS logging ~~(if ECS is enabled it is applied to all pino transports!)~~
+- Removed Logtail and Elastic-stream pino providers -> All logs should go to stdout
 - It is now possible to have multiple pino transports aka (use elastic and logtail simultaneously)
 
 ## Changes when migrating from v3.x to v4.x
