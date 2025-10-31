@@ -16,6 +16,12 @@ module.exports = async function (appConfig) {
   config.genReqId = generate_request_id
   config.requestIdHeader = 'x-request-id'
 
+  const useRequestLogging = !config.disableRequestLogging
+  if (useRequestLogging) {
+    // Force disable the built in request logging
+    config.disableRequestLogging = true
+  }
+
 
   let loggingConfig = config.logger
 
@@ -31,7 +37,7 @@ module.exports = async function (appConfig) {
 
   const fastify = Fastify(config)
 
-  if (!config.disableRequestLogging) {
+  if (useRequestLogging) {
     fastify.log.info('requestLogging enabled, adding hooks; onRequest and onResponse to fastify Instance!')
     logging.setupRequestLogging(fastify, loggingConfig)
   }
