@@ -4,5 +4,5 @@
 module.exports = async function (fastify) {
   fastify.log.debug('adding plugin healthcheck')
 
-  fastify.route({ method: 'GET', url: '/', handler: async () => '' })
+  fastify.route({ method: 'GET', url: '/', handler: (req, res) => res.send({ alive: true }) })
 }

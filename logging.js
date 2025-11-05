@@ -80,6 +80,8 @@ function setupLogging(appConfig, loggingConfig) {
 function setupECSRequestLogging(fastify) {
   // Making a sync function async would reduce performance
   fastify.addHook('onRequest', function (request, _, done) {
+    if (request.url.startsWith('/healthcheck')) { return done() }
+
     request.log.info({
       event: {
         category: [ 'api', 'web' ],
@@ -110,6 +112,8 @@ function setupECSRequestLogging(fastify) {
   })
 
   fastify.addHook('onResponse', function (request, reply, done) {
+    if (request.url.startsWith('/healthcheck')) { return done() }
+
     request.log.info({
       event: {
         category: [ 'api', 'web' ],
@@ -153,6 +157,8 @@ function setupECSRequestLogging(fastify) {
 function setupNormalRequestLogging(fastify) {
   // Making a sync function async would reduce performance
   fastify.addHook('onRequest', function (request, _, done) {
+    if (request.url.startsWith('/healthcheck')) { return done() }
+
     request.log.info({
       url: request.originalUrl,
       clientIp: request.ip,
@@ -168,6 +174,8 @@ function setupNormalRequestLogging(fastify) {
   })
 
   fastify.addHook('onResponse', function (request, reply, done) {
+    if (request.url.startsWith('/healthcheck')) { return done() }
+
     request.log.info({
       url: request.originalUrl,
       clientIp: request.ip,
