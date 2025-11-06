@@ -22,7 +22,14 @@ export interface IFastifyLoggerConfig {
      * Specify if running in a container (default true)
      * @default true
      */
-    containerized?: boolean
+    containerized?: boolean,
+    /**
+     * 
+     * @default string[] user.password password user.phone user.mobilePhone user.mobile
+          http.request.headers.bearer
+          url.password
+     */
+    redactFields?: string[]
   }
 }
 

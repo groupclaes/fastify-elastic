@@ -45,7 +45,7 @@ function setupLogging(appConfig, loggingConfig) {
         level: (label) => ({ log: { level: label } })
       },
       redact: {
-        paths: [
+        paths: loggingConfig.ecs.redactFields ?? [
           'user.password', 'password', 'user.phone', 'user.mobilePhone', 'user.mobile',
           'http.request.headers.bearer',
           'url.password'
