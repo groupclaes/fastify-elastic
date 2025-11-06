@@ -21,9 +21,6 @@ function setupLogging(appConfig, loggingConfig) {
       formatters: {
         bindings: () => {
           const baseFields = {
-            process: {
-              pid: process.pid,
-            },
             service: {
               name: appConfig.serviceName,
               version: process.env['APP_VERSION'],
@@ -33,10 +30,14 @@ function setupLogging(appConfig, loggingConfig) {
           }
           // Fields will be set by the orchastrator logger as it has more details & privileges
           if (!loggingConfig.ecs.containerized) {
-            baseFields['host'] = {
+            baseFields.host = {
               hostname,
               architecture: process.arch,
               uptime: loggingConfig.showUptime ? os.uptime() : undefined
+            }
+            // Only show the process id for host applications, as it's always 1 in a container
+            baseFields.process = {
+              pid: process.pid,
             }
           }
 
