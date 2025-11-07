@@ -1,3 +1,4 @@
+import { ISitemapOptions } from './plugins/sitemap.d';
 import { FastifyInstance } from 'fastify'
 
 export interface IFastifyAppConfig {
@@ -36,9 +37,16 @@ export interface IFastifyLoggerConfig {
 export interface IFastifyConfig {
   serviceName: string
   port?: number
-  fastify?: IFastifyAppConfig,
-  ecs?: IFastifyECSConfig
+  fastify?: IFastifyAppConfig
   cors?: any
+  cache?: {
+    /**
+     * Default time in ms to cache when reply.cache without a value is used
+     * @default {number} 60000
+     */
+    defaultTTL: number
+  }
+  sitemap: ISitemapOptions
 }
 
 export default function fastify(config: IFastifyConfig): Promise<FastifyInstance>
