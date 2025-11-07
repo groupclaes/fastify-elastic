@@ -1,6 +1,6 @@
 {
   "name": "@groupclaes/fastify-elastic",
-  "version": "5.1.1",
+  "version": "5.1.3",
   "description": "GroupClaes's simple fastify wrapper function for simpler setup and elastic logging support",
   "main": "index.js",
   "scripts": {
@@ -25,6 +25,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@fastify/caching": "^9.0.3",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
     "fastify": "^5.6.1",

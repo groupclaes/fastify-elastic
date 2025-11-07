@@ -1,6 +1,6 @@
-const hostname = require('os').hostname()
 const fastifyPlugin = require('fastify-plugin')
 
+const hostname = require('os').hostname()
 const maxRequestId = 3656158440062975n
 let requestId = 0
 
