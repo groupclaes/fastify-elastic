@@ -3,7 +3,7 @@ export interface ISitemapBaseRoute {
   path: string
   language?: string
   lastModified?: Date | string
-  changeFrequency:
+  changeFrequency?:
     'always'
     | 'hourly'
     | 'daily'
@@ -14,7 +14,7 @@ export interface ISitemapBaseRoute {
   /**
    * @description Allowed values between 0.1 and 1.0
    */
-  priority: number
+  priority?: number
 }
 export interface ISitemapRoute extends ISitemapBaseRoute {
   translations?: ISitemapBaseRoute[]
@@ -22,7 +22,10 @@ export interface ISitemapRoute extends ISitemapBaseRoute {
 
 export interface ISitemapOptions {
   routes: ISitemapRoute[]
-  baseUrl: string
+  /**
+   * @default 
+   */
+  baseUrl?: string
   /**
    * @default 3600000
    */
@@ -37,7 +40,7 @@ export interface ISitemapOptions {
      */
     prefixFormat: string
   }
-  dynamicRoutes: (language?: string) => ISitemapRoute[] | Promise<ISitemapRoute[]>
+  dynamicRoutes?: (language?: string) => ISitemapRoute[] | Promise<ISitemapRoute[]>
 }
 
 export function sitemapPlugin(fastifyPlugin: FastifyInstance, options: ISitemapOptions): Promise<void>
