@@ -46,7 +46,7 @@ export interface IFastifyConfig {
      */
     defaultTTL: number
   }
-  sitemap: ISitemapOptions
+  sitemap?: ISitemapOptions
 }
 
 export default function fastify(config: IFastifyConfig): Promise<FastifyInstance>
