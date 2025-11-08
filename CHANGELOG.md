@@ -1,6 +1,10 @@
 # @groupclaes/fastify-elastic changelog
 
-
+## Version 5.1.5
+### Fixes
+* Bug - Fix generic configuration requiring sitemap
+* Bug - Fix sitemap options interface requiring dynamic routes to be defined
+* Bug - Fix sitemap route requiring priority to be set
 
 ## Version 5.1.3
 ### Features
