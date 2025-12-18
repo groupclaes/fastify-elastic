@@ -15,7 +15,7 @@
     "fastify": "^4.29.1",
     "fastify-plugin": "^4.5.1",
     "jose": "^4.15.5",
-    "mssql": "^10.0.2",
+    "mssql": "^12.2.0",
     "pino": "^8.21.0",
     "pino-elasticsearch": "^6.7.0"
   }
