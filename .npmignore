@@ -4,6 +4,6 @@ tests/
 test-project.js
 test.js
 pnpm-lock.yaml
-CHANGELOG.md
-README.md
+bun.lock
+*.md
 .gitignore
