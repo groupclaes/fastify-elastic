@@ -3,7 +3,6 @@ const logging = require('./logging')
 
 // local plugins
 const { generate_request_id } = require('./plugins/request-id')
-const { default: fastifyCaching } = require('@fastify/caching')
 
 /**
  * 
@@ -86,11 +85,13 @@ module.exports = async function (appConfig) {
   if (appConfig.mssql)
     await fastify.register(require('./plugins/mssql'), appConfig.mssql)
 
-  if (appConfig.cache) 
+  if (appConfig.cache)  {
+    const { default: fastifyCaching } = require('@fastify/caching')
     await fastify.register(fastifyCaching, {
       privacy: fastifyCaching.privacy.PUBLIC,
       expiresIn: Number.isNaN(+appConfig.cache.defaultTTL) ? 60000 : +appConfig.cache.defaultTTL
     })
+  }
 
   if (appConfig.sitemap)
     await fastify.register(require('./plugins/sitemap'), appConfig.sitemap)
