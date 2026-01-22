@@ -11,7 +11,7 @@ const sitemapModifications = {}
  * Resolve and error handle dynamic routes
  * 
  * @param {string} language 
- * @returns {Promise<string>}
+ * @returns {Promise<ISitemapRoute[]>}
  */
 async function resolveDynamicRoutes(language) {
   if (sitemapPluginOptions.dynamicRoutes) {
@@ -19,9 +19,21 @@ async function resolveDynamicRoutes(language) {
     if (routes?.length > 0) {
       return routes
     }
-
-    return []
   }
+
+  return []
+}
+
+/**
+ * 
+ * @param {string} language 
+ */
+function getCorrectBaseUrl(language) {
+  if (sitemapPluginOptions.i18n?.prefix) {
+    return sitemapPluginOptions.baseUrl + sitemapPluginOptions.i18n.prefixFormat.replace('{{language}}', language)
+  }
+
+  return sitemapPluginOptions.baseUrl
 }
 
 /**
@@ -31,45 +43,54 @@ async function resolveDynamicRoutes(language) {
  * @returns {Promise<string>} XML-based urlset document to serve as a sitemap
  */
 async function generateLanguageUrlSet(language) {
-  let baseUrl = sitemapPluginOptions.baseUrl
-  if (sitemapPluginOptions.i18n?.prefix) {
-    baseUrl += sitemapPluginOptions.i18n.prefixFormat.replace('{{language}}', language)
-  }
-
   /**
    * @type {import('./sitemap.d').ISitemapBaseRoute[]}
    */
   const routes = sitemapPluginOptions.routes
-    .map(x => x.language === language
-      ? x
-      : x.translations.find(y => y.language === language)
-    )
+    .filter(x => x.language === language
+      || (x.translations?.length > 0 && x.translations.some(y => y.language === language)))
 
-  // Get the statically defined routes for in the config
+  // Get the dynamically generated routes for in the config
   routes.push(...await resolveDynamicRoutes(language))
   
   
   const urlSet = routes.map(x => {
-      let optionalFields = ''
-      if (x.lastModified && x.changeFrequency != 'always') {
-        optionalFields += `<lastmod>${
-          x.lastModified instanceof Date
-            ? x.lastModified.toISOString() : x.lastModified
-        }</lastmod>`
-      }
+    let optionalFields = ''
+    if (x.lastModified && x.changeFrequency != 'always') {
+      optionalFields += `<lastmod>${
+        x.lastModified instanceof Date
+          ? x.lastModified.toISOString() : x.lastModified
+      }</lastmod>`
+    }
 
-      if (x.changeFrequency) {
-        optionalFields += `<changefreq>${x.changeFrequency}</changefreq>`
-      }
+    if (x.changeFrequency) {
+      optionalFields += `<changefreq>${x.changeFrequency}</changefreq>`
+    }
 
-      if (x.priority) {
-        optionalFields += `<priority>${x.priority}</priority>`
-      }
+    if (x.priority) {
+      optionalFields += `<priority>${x.priority}</priority>`
+    }
+
+    if (x.translations?.length > 0) {
+      const baseUrl = getCorrectBaseUrl(x.language)
+      const xhtmlLinks = getRouteXHtmlLink(x, null, baseUrl) + getRouteXHtmlLink(x, 'x-default', baseUrl)
+        // Get all the child xhtml:links
+        + x.translations.map(y => getRouteXHtmlLink(y, null, getCorrectBaseUrl(y.language))).join('')
+
+      optionalFields += xhtmlLinks
+    }
+
+    const baseUrl = getCorrectBaseUrl(language)
+    if (x.language === language) {
       return `<url><loc>${baseUrl}${x.path}</loc>${optionalFields}</url>`
-    }).join('')
+    } else {
+      const translatedRoute = x.translations.find(y => y.language === language)
+      return `<url><loc>${baseUrl}${translatedRoute.path}</loc>${optionalFields}</url>`
+    }
+  }).join('')
 
   sitemapModifications[language] = new Date()
-  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlSet}</urlset>`
+  return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">${urlSet}</urlset>`
 }
 
 /**
@@ -78,8 +99,8 @@ async function generateLanguageUrlSet(language) {
  * @param {import("./sitemap.d").ISitemapBaseRoute} route 
  * @returns {string} The xhtml link string
  */
-function getRouteXHtmlLink(route, overrideLanguage) {
-  return `<xhtml:link rel="alternate" hreflang="${overrideLanguage ? overrideLanguage : route.language}" href="${sitemapPluginOptions.baseUrl}${route.path}" />`
+function getRouteXHtmlLink(route, overrideLanguage, baseUrl = sitemapPluginOptions.baseUrl) {
+  return `<xhtml:link rel="alternate" hreflang="${overrideLanguage ? overrideLanguage : route.language}" href="${baseUrl}${route.path}" />`
 }
 
 /**
