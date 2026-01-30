@@ -8,45 +8,64 @@ module.exports.handler = handler
 /**
  * @param {import ('fastify').FastifyInstance} fastify
  */
-async function jwt(fastify) {
+async function jwt(fastify, config) {
   fastify.log.debug('adding plugin jwt')
 
   fastify.decorateRequest('hasRole')
   fastify.decorateRequest('hasPermission')
   fastify.decorateRequest('jwt')
-  fastify.addHook('preHandler', handler)
+  fastify.addHook('preHandler', (req, rep) => handler(req, rep, config))
 }
 
 /**
  * @param {import ('fastify').FastifyRequest} request
  * @param {import ('fastify').FastifyReply} reply
  */
-async function handler(request, reply) {
+async function handler(request, reply, config) {
   // handle authorization header if set
   if (request.headers.authorization) {
     const token = request.headers.authorization.substring(7)
 
     if (token) {
       const header = jose.decodeProtectedHeader(token)
-      if (!header.jku)
-        return reply.error('missing required jku in token header', 401)
 
-      try {
-        const JWKS = jose.createRemoteJWKSet(new URL(header.jku))
-        const { payload } = await jose.jwtVerify(token, JWKS)
+      if (!header.jku) {
+        if (config.expect_jku) {
+          reply.error('missing required jku in token header', 401)
+        } else {
+          try {
+            const { payload } = await jose.decodeJwt(token)
+            request.jwt = payload
 
-        request.jwt = payload
-        request.hasRole = hasRole
-        // permission: 'read', 'write', 'read_all'
-        request.hasPermission = hasPermission
+            if (payload?.oid)
+              request.log = request.log.child({ user: { id: payload.oid } })
+            else if (payload?.sub)
+              request.log = request.log.child({ user: { id: payload.sub } })
+          } catch (err) {
+            request.log.warn({ err }, 'failed to authenticate request')
+            // if (err.code === 'ERR_JWT_EXPIRED')
+            //   return reply.error(err.message, 401)
+            // return reply.error(err?.message ?? 'unknown error while reading jwt', 403)
+          }
+        }
+      } else {
+        try {
+          const JWKS = jose.createRemoteJWKSet(new URL(header.jku))
+          const { payload } = await jose.jwtVerify(token, JWKS)
 
-        if (payload?.sub)
-          request.log = request.log.child({ user: { id: payload.sub } })
-      } catch (err) {
-        request.log.warn({ err }, 'failed to authenticate request')
-        // if (err.code === 'ERR_JWT_EXPIRED')
-        //   return reply.error(err.message, 401)
-        // return reply.error(err?.message ?? 'unknown error while reading jwt', 403)
+          request.jwt = payload
+          request.hasRole = hasRole
+          // permission: 'read', 'write', 'read_all'
+          request.hasPermission = hasPermission
+
+          if (payload?.sub)
+            request.log = request.log.child({ user: { id: payload.sub } })
+        } catch (err) {
+          request.log.warn({ err }, 'failed to authenticate request')
+          // if (err.code === 'ERR_JWT_EXPIRED')
+          //   return reply.error(err.message, 401)
+          // return reply.error(err?.message ?? 'unknown error while reading jwt', 403)
+        }
       }
     }
   }
