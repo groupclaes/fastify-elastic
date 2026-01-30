@@ -36,7 +36,7 @@ async function handler(request, reply, config) {
         } else {
           try {
             const payload = await jose.decodeJwt(token)
-            request.log.info({ payload }, 'decoded jwt payload')
+            // request.log.info({ payload }, 'decoded jwt payload')
             request.jwt = payload
 
             if (payload?.oid)
