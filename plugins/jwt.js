@@ -30,11 +30,13 @@ async function handler(request, reply, config) {
       const header = jose.decodeProtectedHeader(token)
 
       if (!header.jku) {
+        request.log.warn('no jku found in token header, falling back to local jwt verification')
         if (config.expect_jku) {
           reply.error('missing required jku in token header', 401)
         } else {
           try {
-            const { payload } = await jose.decodeJwt(token)
+            const payload = await jose.decodeJwt(token)
+            request.log.info({ payload }, 'decoded jwt payload')
             request.jwt = payload
 
             if (payload?.oid)
