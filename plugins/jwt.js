@@ -31,7 +31,7 @@ async function handler(request, reply, config) {
 
       if (!header.jku) {
         request.log.warn('no jku found in token header, falling back to local jwt verification')
-        if (config.expect_jku) {
+        if (config?.expect_jku) {
           reply.error('missing required jku in token header', 401)
         } else {
           try {
