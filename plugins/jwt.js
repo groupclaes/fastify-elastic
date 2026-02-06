@@ -30,7 +30,7 @@ async function handler(request, reply, config) {
       const header = jose.decodeProtectedHeader(token)
 
       if (!header.jku) {
-        request.log.warn('no jku found in token header, falling back to local jwt verification')
+        // request.log.warn('no jku found in token header, falling back to local jwt verification')
         if (config?.expect_jku) {
           reply.error('missing required jku in token header', 401)
         } else {
@@ -38,9 +38,17 @@ async function handler(request, reply, config) {
             const payload = await jose.decodeJwt(token)
             // request.log.info({ payload }, 'decoded jwt payload')
             request.jwt = payload
+            request.hasRole = hasRole
 
             if (payload?.oid)
-              request.log = request.log.child({ user: { id: payload.oid } })
+              request.log = request.log.child({
+                user: {
+                  id: payload.oid,
+                  email: payload.upn,
+                  full_name: payload.name,
+                  roles: payload.roles
+                }
+              })
             else if (payload?.sub)
               request.log = request.log.child({ user: { id: payload.sub } })
           } catch (err) {
