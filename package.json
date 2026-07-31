@@ -1,6 +1,6 @@
 {
   "name": "@groupclaes/fastify-elastic",
-  "version": "5.0.9",
+  "version": "5.0.10",
   "description": "GroupClaes's simple fastify wrapper function for simpler setup and elastic logging support",
   "main": "index.js",
   "scripts": {
@@ -26,12 +26,11 @@
   "license": "MIT",
   "dependencies": {
     "@elastic/ecs-pino-format": "^1.5.0",
-    "@fastify/cookie": "^11.0.2",
-    "@fastify/cors": "^11.1.0",
-    "@logtail/pino": "^0.5.5",
-    "fastify-plugin": "^5.0.1",
-    "jose": "^6.1.0",
-    "pino": "^9.9.0",
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/cors": "^11.3.0",
+    "fastify-plugin": "^5.1.0",
+    "jose": "^6.2.5",
+    "pino": "^9.14.0",
     "pino-elasticsearch": "^8.1.0"
   },
   "peerDependencies": {

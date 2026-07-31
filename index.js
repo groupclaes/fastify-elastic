@@ -62,16 +62,16 @@ function setupElasticLogging(elasticConfig, loggingConfig, serviceName) {
   return pino(loggingConfig, streamToElastic)
 }
 
-function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
-  return {
-    level: loggingConfig.level ?? 'info',
-    target: '@logtail/pino',
-    options: {
-      ...loggingConfig,
-      sourceToken: logtailConfig.token
-    }
-  }
-}
+// function setupLogtailLogging(logtailConfig, loggingConfig, serviceName) {
+//   return {
+//     level: loggingConfig.level ?? 'info',
+//     target: '@logtail/pino',
+//     options: {
+//       ...loggingConfig,
+//       sourceToken: logtailConfig.token
+//     }
+//   }
+// }
 
 function setupLogging(appConfig, loggingConfig) {
   if (appConfig.ecs) {
